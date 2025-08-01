@@ -21,7 +21,7 @@ export interface Capabilities {
 export interface ToolDefinition<S extends StandardSchemaV1> {
   name: string
   description: string
-  schema: S
+  schema?: S
   jsonSchema?: Record<string, unknown> // Manual JSON Schema representation
 }
 

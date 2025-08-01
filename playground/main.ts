@@ -9,7 +9,7 @@ const app = new H3MCP({
 })
 
 app.tool({
-  name: 'exampleTool',
+  name: 'test',
   description: 'An example tool that echoes back the input',
   schema: v.object({
     input: v.string(),

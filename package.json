@@ -9,10 +9,10 @@
   "exports": {
     "./package.json": "./package.json",
     ".": {
-      "default": "./dist/server.mjs"
+      "default": "./dist/index.mjs"
     }
   },
-  "types": "./dist/server.d.mts",
+  "types": "./dist/index.d.mts",
   "files": [
     "dist"
   ],
