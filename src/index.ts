@@ -5,6 +5,7 @@ import {
   type H3Event,
 } from 'h3';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
+import { toJsonSchema } from "@standard-community/standard-json";
 
 import { jsonRpcHandler, type JsonRpcMethodMap } from './utils/json-rpc.ts';
 import type { ServerInfo, Capabilities, ToolDefinition, ToolHandler } from './types/index.ts';
@@ -58,12 +59,21 @@ export class H3MCP extends H3 {
   /**
    * Lists available tools. This method is now called by the RPC handler.
    */
-  private listTools() {
-    return [...this.tools.values()].map(({ definition }) => ({
+  private async listTools() {
+    return await Promise.all([...this.tools.values()].map(async ({ definition }) => ({
       name: definition.name,
       description: definition.description,
-      schema: definition.jsonSchema || {}, // TODO: add json schema parser for supported validation libraries
-    }));
+      schema: definition.jsonSchema
+        || (
+          definition.schema
+          ? await toJsonSchema(definition.schema)
+            .catch(() => {
+              console.warn(`[h3-mcp] Warning: Failed to convert schema for tool "${definition.name}".`);
+              return undefined;
+            })
+          : undefined
+        ),
+    })));
   }
 
   /**
