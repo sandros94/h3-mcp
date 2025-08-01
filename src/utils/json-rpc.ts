@@ -75,7 +75,10 @@ export type JsonRpcMethodHandler<T = unknown, D = unknown> = (
 /**
  * A map of method names to their corresponding handler functions.
  */
-export type JsonRpcMethodMap<T = unknown, D = unknown> = Record<string, JsonRpcMethodHandler<T, D>>;
+export type JsonRpcMethodMap<T = unknown, D = unknown> = Record<
+  string,
+  JsonRpcMethodHandler<T, D>
+>;
 
 /**
  * Creates an H3 event handler that implements the JSON-RPC 2.0 specification.
@@ -83,7 +86,9 @@ export type JsonRpcMethodMap<T = unknown, D = unknown> = Record<string, JsonRpcM
  * @param methods A map of RPC method names to their handler functions.
  * @returns An H3 EventHandler.
  */
-export function jsonRpcHandler<T = unknown, D = unknown>(methods: JsonRpcMethodMap<T, D>): EventHandler {
+export function jsonRpcHandler<T = unknown, D = unknown>(
+  methods: JsonRpcMethodMap<T, D>,
+): EventHandler {
   return eventHandler(async (event: H3Event) => {
     // JSON-RPC requests must be POST.
     if (event.req.method !== "POST") {
@@ -109,12 +114,13 @@ export function jsonRpcHandler<T = unknown, D = unknown>(methods: JsonRpcMethodM
 
     let hasErrored = false;
     let error = undefined;
-    const body = await readBody<JsonRpcRequest<T> | JsonRpcRequest<T>[]>(event)
-      .catch((error_) => {
-        hasErrored = true;
-        error = error_;
-        return undefined;
-      });
+    const body = await readBody<JsonRpcRequest<T> | JsonRpcRequest<T>[]>(
+      event,
+    ).catch((error_) => {
+      hasErrored = true;
+      error = error_;
+      return undefined;
+    });
 
     if (hasErrored || !body) {
       return sendJsonRpcError(null, PARSE_ERROR, "Parse error", error);
@@ -150,7 +156,7 @@ export function jsonRpcHandler<T = unknown, D = unknown>(methods: JsonRpcMethodM
 
       // Execute the method handler.
       try {
-        const result = await handler(params || {} as T, event);
+        const result = await handler(params || ({} as T), event);
 
         // For notifications, we don't send a response.
         if (id !== undefined && id !== null) {
@@ -178,7 +184,9 @@ export function jsonRpcHandler<T = unknown, D = unknown>(methods: JsonRpcMethodM
       }
     };
 
-    const responses = await Promise.all(requests.map((element) => processRequest(element)));
+    const responses = await Promise.all(
+      requests.map((element) => processRequest(element)),
+    );
 
     // Filter out undefined results from notifications.
     const finalResponses = responses.filter(

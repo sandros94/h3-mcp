@@ -19,8 +19,8 @@
   "scripts": {
     "build": "obuild",
     "dev": "cd playground && pnpm dev",
-    "lint": "eslint --cache . && prettier -c src test examples docs",
-    "lint:fix": "automd && eslint --cache . --fix && prettier -c src test examples docs -w",
+    "lint": "eslint . && prettier -c .",
+    "lint:fix": "automd && eslint . --fix && prettier -w .",
     "release": "pnpm lint && pnpm build && changelogen --release --prerelease --publish --publishTag beta && git push --follow-tags",
     "test": "pnpm lint && pnpm test:types && vitest --run",
     "test:types": "tsc --noEmit --skipLibCheck"

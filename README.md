@@ -23,8 +23,8 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 - [ ] Support for static resources definition
 - [ ] Support for prompt templates definition
 - [ ] Main `GET` endpoint, for:
-  * [ ] server capabilities
-  * [ ] notifications
+  - [ ] server capabilities
+  - [ ] notifications
 
 ## Usage
 
@@ -39,26 +39,29 @@ Minimal example:
 
 ```js
 import { H3MCP } from "h3-mcp"; // or from CDN via "https://esm.sh/h3-mcp"
-import { serve } from 'h3'
-import * as v from 'valibot'
+import { serve } from "h3";
+import * as v from "valibot";
 
 const app = new H3MCP({
-  name: 'My MCP Server',
-  version: '1.0.0',
-  description: 'A sample Model-as-a-Service server using H3 MCP',
-})
+  name: "My MCP Server",
+  version: "1.0.0",
+  description: "A sample Model-as-a-Service server using H3 MCP",
+});
 
-app.tool({
-  name: 'test',
-  description: 'An example tool that echoes back the input',
-  schema: v.object({
-    input: v.string(),
-  }),
-}, async ({ input }) => {
-  return { output: `You said: ${input}` }
-})
+app.tool(
+  {
+    name: "test",
+    description: "An example tool that echoes back the input",
+    schema: v.object({
+      input: v.string(),
+    }),
+  },
+  async ({ input }) => {
+    return { output: `You said: ${input}` };
+  },
+);
 
-serve(app)
+serve(app);
 ```
 
 ### Requesting a Tool call
@@ -121,9 +124,7 @@ You should receive a response like this:
             "type": "string"
           }
         },
-        "required": [
-          "input"
-        ]
+        "required": ["input"]
       }
     }
   ]
@@ -137,23 +138,26 @@ Only validation libraries supported by [`@standard-community/standard-json`](htt
 If your validation library is supported by the [`@standard-schema/spec`](https://github.com/standard-schema/standard-schema) but not from the `@standard-community/standard-json`, you can still use it by providing the `jsonSchema` option in the tool definition, like this:
 
 ```ts
-app.tool({
-  name: 'test',
-  description: 'An example tool that echoes back the input',
-  schema: v.object({
-    input: v.string(),
-  }),
-  jsonSchema: {
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    type: 'object',
-    properties: {
-      input: { type: 'string' },
+app.tool(
+  {
+    name: "test",
+    description: "An example tool that echoes back the input",
+    schema: v.object({
+      input: v.string(),
+    }),
+    jsonSchema: {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      type: "object",
+      properties: {
+        input: { type: "string" },
+      },
+      required: ["input"],
     },
-    required: ['input'],
   },
-}, async ({ input }) => {
-  return { output: `You said: ${input}` }
-})
+  async ({ input }) => {
+    return { output: `You said: ${input}` };
+  },
+);
 ```
 
 ## Development
