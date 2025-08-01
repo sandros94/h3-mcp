@@ -1,7 +1,7 @@
 {
   "name": "h3-mcp",
   "version": "0.0.0",
-  "description": "Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.",
+  "description": "Minimal MCP server built with H3 v2 (beta) as a dedicated app or nested-app.",
   "repository": "sandros94/h3-mcp",
   "license": "MIT",
   "sideEffects": false,
@@ -37,6 +37,7 @@
   "devDependencies": {
     "@types/node": "^24.0.10",
     "@vitest/coverage-v8": "^3.2.4",
+    "automd": "^0.4.0",
     "changelogen": "^0.6.1",
     "esbuild": "^0.25.5",
     "eslint": "^9.30.1",

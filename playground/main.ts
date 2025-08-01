@@ -1,5 +1,5 @@
-import { serve } from 'h3'
 import { H3MCP } from 'h3-mcp'
+import { serve } from 'h3'
 import * as v from 'valibot'
 
 const app = new H3MCP({
