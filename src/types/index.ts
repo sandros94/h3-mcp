@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3';
-import { StandardSchemaV1 } from '@standard-schema/spec';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Server Information
 export interface ServerInfo {
@@ -22,6 +22,7 @@ export interface ToolDefinition<S extends StandardSchemaV1> {
   name: string
   description: string
   schema: S
+  jsonSchema?: Record<string, unknown> // Manual JSON Schema representation
 }
 
 // Tool Handler
