@@ -38,7 +38,7 @@ npx nypm install h3-mcp
 Minimal example:
 
 ```js
-import { H3MCP } from "h3-mcp"; // or "https://esm.sh/h3-mcp" from CDN
+import { H3MCP } from "h3-mcp"; // or from CDN via "https://esm.sh/h3-mcp"
 import { serve } from 'h3'
 import * as v from 'valibot'
 
