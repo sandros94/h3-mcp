@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "h3-mcp-playground",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm node-ts --watch ./main.ts",
+    "bun": "bun --watch main.ts",
+    "deno": "deno run --watch -A main.ts",
+    "node-ts": "node --disable-warning=ExperimentalWarning --experimental-strip-types"
+  },
+  "devDependencies": {
+    "h3-mcp": "latest",
+    "valibot": "^1.1.0"
+  }
+}
