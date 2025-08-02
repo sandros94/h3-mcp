@@ -12,7 +12,7 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 
 ## Features
 
-- Built with H3 v2 (beta) for high performance and runtime agnosticity (in can be mounted as a [nested-app](https://h3.dev/guide/basics/nested-apps)).
+- Built with H3 v2 (beta) for high performance and runtime agnosticity.
 - It is based on the JSON-RPC protocol to accept commands and return results.
 - Built-in validation for tool calls, with JSON Schema for supported validation libraries.
 - Simple Tool registration and invocation, allowing you to define tools with input validation.
@@ -28,6 +28,7 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 - [ ] Main `GET` endpoint, for:
   - [ ] server capabilities
   - [ ] notifications
+- [ ] Support as a [nested-app](https://h3.dev/guide/basics/nested-apps)
 
 ## Usage
 
