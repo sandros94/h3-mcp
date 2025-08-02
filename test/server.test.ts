@@ -1,0 +1,80 @@
+import { describe, it, expect } from "vitest";
+import * as v from "valibot";
+
+import { H3MCP } from "../src/index.ts";
+
+describe("H3MCP", () => {
+  const app = new H3MCP({
+    name: "Test MCP Server",
+    version: "1.0.0",
+    description: "A test server for H3 MCP tools",
+  });
+  app.tool(
+    {
+      name: "echo",
+      description: "Echoes back the input",
+      schema: v.object({
+        input: v.string(),
+      }),
+    },
+    async ({ input }) => {
+      return { output: `You said: ${input}` };
+    },
+  );
+
+  describe("Tools", () => {
+    it("should list available tools", async () => {
+      const result = await app.request("/mcp", {
+        method: "POST",
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "tools/list",
+          params: {},
+          id: 1,
+        }),
+      });
+
+      const json = await result.json();
+      expect(json).toEqual({
+        jsonrpc: "2.0",
+        result: [
+          {
+            name: "echo",
+            description: "Echoes back the input",
+            schema: {
+              $schema: "http://json-schema.org/draft-07/schema#",
+              type: "object",
+              properties: {
+                input: { type: "string" },
+              },
+              required: ["input"],
+            },
+          },
+        ],
+        id: 1,
+      });
+    });
+
+    it("should echo input", async () => {
+      const result = await app.request("/mcp", {
+        method: "POST",
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "tools/call",
+          params: {
+            name: "echo",
+            arguments: { input: "Hello, World!" },
+          },
+          id: 1,
+        }),
+      });
+
+      const json = await result.json();
+      expect(json).toEqual({
+        jsonrpc: "2.0",
+        result: { output: "You said: Hello, World!" },
+        id: 1,
+      });
+    });
+  });
+});
