@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.0.2
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.0.1...v0.0.2)
+
+### 🩹 Fixes
+
+- Use `defineHandler` instead of `eventHandler` ([9ac050e](https://github.com/sandros94/h3-mcp-tools/commit/9ac050e))
+
+### 🏡 Chore
+
+- Specify `h3` version ([643166c](https://github.com/sandros94/h3-mcp-tools/commit/643166c))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.0.1
 
 ### 🚀 Enhancements
