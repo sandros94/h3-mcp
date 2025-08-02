@@ -3,7 +3,7 @@ import {
   type EventHandler,
   HTTPError,
   readBody,
-  eventHandler,
+  defineHandler,
 } from "h3";
 
 /**
@@ -89,7 +89,7 @@ export type JsonRpcMethodMap<T = unknown, D = unknown> = Record<
 export function jsonRpcHandler<T = unknown, D = unknown>(
   methods: JsonRpcMethodMap<T, D>,
 ): EventHandler {
-  return eventHandler(async (event: H3Event) => {
+  return defineHandler(async (event: H3Event) => {
     // JSON-RPC requests must be POST.
     if (event.req.method !== "POST") {
       throw new HTTPError({
