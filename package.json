@@ -21,7 +21,8 @@
     "dev": "cd playground && pnpm dev",
     "lint": "eslint . && prettier -c .",
     "lint:fix": "automd && eslint . --fix && prettier -w .",
-    "release": "pnpm lint && pnpm build && changelogen --release --prerelease --publish --publishTag beta && git push --follow-tags",
+    "prepack": "pnpm build",
+    "release": "pnpm lint && pnpm prepack && changelogen --release --push --publish",
     "test": "pnpm lint && pnpm test:types && vitest --run",
     "test:types": "tsc --noEmit --skipLibCheck"
   },
