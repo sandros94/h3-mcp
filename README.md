@@ -18,6 +18,9 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 - Simple Tool registration and invocation, allowing you to define tools with input validation.
 - Tool listing method to retrieve all registered tools.
 
+> [!WARNING]  
+> Project currently under heavy development. The main scope of this project is to provide a simple MCP server with minimal dependencies, alogside showcasing H3 v2 (beta). If you are looking for more capabilities out of the box I suggest you to look for the official [MCP TS SDK](https://github.com/modelcontextprotocol/typescript-sdk) or the great [TMCP](https://github.com/paoloricciuti/tmcp). Or, at least, once once you consider this project more mature.
+
 ### TODO
 
 - [ ] Support for static resources definition
