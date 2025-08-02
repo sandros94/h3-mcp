@@ -5,6 +5,9 @@ export default defineBuildConfig({
     {
       type: "bundle",
       input: ["src/types/index.ts", "src/index.ts"],
+      rolldown: {
+        external: ["effect"],
+      },
     },
   ],
 });

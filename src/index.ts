@@ -1,8 +1,8 @@
-import { H3, HTTPError, type H3Config, type H3Event } from "h3";
+import { H3, type H3Config } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { toJsonSchema } from "@standard-community/standard-json";
 
-import { jsonRpcHandler, type JsonRpcMethodMap } from "./utils/json-rpc.ts";
+import type { McpTool, McpMethodMap } from "./utils/mcp/index.ts";
+import { mcpTools, mcpHandler } from "./utils/mcp/index.ts";
 import type {
   ServerInfo,
   Capabilities,
@@ -10,16 +10,14 @@ import type {
   ToolHandler,
 } from "./types/index.ts";
 
+export * from "./utils/json-rpc.ts";
+export * from "./utils/mcp/index.ts";
+export * from "./types/index.ts";
+
 export class H3MCP extends H3 {
   private info: ServerInfo;
   private capabilities: Capabilities["capabilities"];
-  private tools: Map<
-    string,
-    {
-      definition: ToolDefinition<StandardSchemaV1>;
-      handler: ToolHandler<StandardSchemaV1>;
-    }
-  > = new Map();
+  private toolsMap = new Map<string, McpTool>();
 
   constructor(info: ServerInfo, options: Capabilities = {}, config?: H3Config) {
     super(config);
@@ -35,12 +33,12 @@ export class H3MCP extends H3 {
     definition: ToolDefinition<S>,
     handler: ToolHandler<S>,
   ): void {
-    if (this.tools.has(definition.name)) {
+    if (this.toolsMap.has(definition.name)) {
       console.warn(
         `[h3-mcp] Warning: Tool "${definition.name}" is being redefined.`,
       );
     }
-    this.tools.set(definition.name, {
+    this.toolsMap.set(definition.name, {
       definition,
       handler: handler as ToolHandler<StandardSchemaV1>,
     });
@@ -53,100 +51,19 @@ export class H3MCP extends H3 {
       capabilities: this.capabilities,
     }));
 
-    // Define the methods for the JSON-RPC handler.
-    const methods: JsonRpcMethodMap = {
-      "tools/list": () => this.listTools(),
-      "tools/call": (params, event) => this.runTool(params, event),
+    // Generate tool-related RPC methods
+    const toolMethods = mcpTools(this.toolsMap);
+
+    // Combine with other methods
+    const methods: McpMethodMap = {
+      ...toolMethods,
       // TODO: add methods for prompts and resources
     };
 
-    // Create the JSON-RPC handler with the defined methods.
-    const rpcHandler = jsonRpcHandler(methods);
+    // Create the main JSON-RPC handler
+    const rpcHandler = mcpHandler(methods);
 
     // Register the handler for all POST requests to /mcp.
     this.post("/mcp", rpcHandler);
   }
-
-  /**
-   * Lists available tools. This method is now called by the RPC handler.
-   */
-  private async listTools() {
-    return await Promise.all(
-      [...this.tools.values()].map(async ({ definition }) => ({
-        name: definition.name,
-        description: definition.description,
-        schema:
-          definition.jsonSchema ||
-          (definition.schema
-            ? await toJsonSchema(definition.schema).catch(() => {
-                console.warn(
-                  `[h3-mcp] Warning: Failed to convert schema for tool "${definition.name}".`,
-                );
-                return undefined;
-              })
-            : undefined),
-      })),
-    );
-  }
-
-  /**
-   * Runs a specific tool. This method is now called by the RPC handler.
-   */
-  private async runTool(params: unknown, event: H3Event) {
-    // Validate the parameters for running a tool
-    if (
-      typeof params !== "object" ||
-      params === null ||
-      !("name" in params) ||
-      typeof params.name !== "string"
-    ) {
-      // This error will be caught by jsonRpcHandler and formatted correctly.
-      throw new HTTPError({
-        status: 400,
-        message:
-          'Invalid parameters for "tools.run". It must be an object with a "name" property.',
-      });
-    }
-
-    const toolName = params.name;
-    const tool = this.tools.get(toolName);
-
-    if (!tool) {
-      throw new HTTPError({
-        status: 404,
-        message: `Tool "${toolName}" not found.`,
-      });
-    }
-
-    let parseResult: StandardSchemaV1.Result<unknown> | undefined = undefined;
-
-    if (tool.definition.schema) {
-      const mcpArguments = "arguments" in params ? params.arguments : undefined;
-
-      parseResult =
-        await tool.definition.schema["~standard"].validate(mcpArguments);
-      if (parseResult.issues) {
-        throw new HTTPError({
-          status: 400,
-          message: `Invalid arguments for tool "${toolName}".`,
-          data: parseResult.issues,
-        });
-      }
-    }
-
-    try {
-      const result = await tool.handler(parseResult?.value, event);
-      return result;
-    } catch (error) {
-      // Re-throw execution errors as HTTPErrors so the jsonRpcHandler can format them.
-      throw new HTTPError({
-        status: 500,
-        message: `Error executing tool "${toolName}".`,
-        data:
-          error instanceof Error ? error.message : "An unknown error occurred.",
-      });
-    }
-  }
 }
-
-export { jsonRpcHandler, type JsonRpcMethodMap };

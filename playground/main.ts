@@ -1,4 +1,4 @@
-import { H3MCP } from "h3-mcp";
+import { H3MCP, mcpHandler, mcpTools } from "h3-mcp";
 import { serve } from "h3";
 import * as v from "valibot";
 
@@ -19,6 +19,26 @@ app.tool(
   async ({ input }) => {
     return { output: `You said: ${input}` };
   },
+);
+
+app.post(
+  "/ciao",
+  mcpHandler(
+    mcpTools([
+      {
+        definition: {
+          name: "test",
+          description: "An example tool that echoes back the input",
+          schema: v.object({
+            input: v.string(),
+          }),
+        },
+        handler: async ({ input }) => {
+          return { output: `You said: ${input}` };
+        },
+      },
+    ]),
+  ),
 );
 
 serve(app);
