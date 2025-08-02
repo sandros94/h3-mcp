@@ -1,4 +1,4 @@
-import { H3MCP, mcpHandler, mcpTools } from "h3-mcp";
+import { H3MCP, mcpHandler, mcpTools } from "h3-mcp-tools";
 import { serve } from "h3";
 import * as v from "valibot";
 

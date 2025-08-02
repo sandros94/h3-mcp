@@ -1,8 +1,8 @@
 {
-  "name": "h3-mcp",
-  "version": "0.0.1",
+  "name": "h3-mcp-tools",
+  "version": "0.0.0",
   "description": "Minimal MCP server built with H3 v2 (beta) as a dedicated app or nested-app.",
-  "repository": "sandros94/h3-mcp",
+  "repository": "sandros94/h3-mcp-tools",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
@@ -50,7 +50,7 @@
     "vitest": "^3.2.4"
   },
   "resolutions": {
-    "h3-mcp": "link:."
+    "h3-mcp-tools": "link:."
   },
   "packageManager": "pnpm@10.14.0",
   "engines": {

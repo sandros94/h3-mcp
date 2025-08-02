@@ -50,7 +50,7 @@ export function mcpTools<S extends StandardSchemaV1>(
           (definition.schema
             ? await toJsonSchema(definition.schema).catch(() => {
                 console.warn(
-                  `[h3-mcp] Warning: Failed to convert schema for tool "${definition.name}".`,
+                  `[h3-mcp-tools] Warning: Failed to convert schema for tool "${definition.name}".`,
                 );
                 return undefined;
               })

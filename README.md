@@ -1,10 +1,10 @@
-# h3-mcp
+# h3-mcp-tools
 
 <!-- automd:badges bundlephobia style="flat" color="FFDC3B" -->
 
-[![npm version](https://img.shields.io/npm/v/h3-mcp?color=FFDC3B)](https://npmjs.com/package/h3-mcp)
-[![npm downloads](https://img.shields.io/npm/dm/h3-mcp?color=FFDC3B)](https://npm.chart.dev/h3-mcp)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/h3-mcp?color=FFDC3B)](https://bundlephobia.com/package/h3-mcp)
+[![npm version](https://img.shields.io/npm/v/h3-mcp-tools?color=FFDC3B)](https://npmjs.com/package/h3-mcp-tools)
+[![npm downloads](https://img.shields.io/npm/dm/h3-mcp-tools?color=FFDC3B)](https://npm.chart.dev/h3-mcp-tools)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/h3-mcp-tools?color=FFDC3B)](https://bundlephobia.com/package/h3-mcp-tools)
 
 <!-- /automd -->
 
@@ -35,13 +35,13 @@ Install the package:
 
 ```sh
 # ✨ Auto-detect (supports npm, yarn, pnpm, deno and bun)
-npx nypm install h3-mcp
+npx nypm install h3-mcp-tools
 ```
 
 Minimal example:
 
 ```js
-import { H3MCP } from "h3-mcp"; // or from CDN via "https://esm.sh/h3-mcp"
+import { H3MCP } from "h3-mcp-tools"; // or from CDN via "https://esm.sh/h3-mcp-tools"
 import { serve } from "h3";
 import * as v from "valibot";
 
@@ -188,11 +188,11 @@ Inspired by:
 
 <!-- automd:contributors license=MIT -->
 
-Published under the [MIT](https://github.com/sandros94/h3-mcp/blob/main/LICENSE) license.
-Made by [community](https://github.com/sandros94/h3-mcp/graphs/contributors) 💛
+Published under the [MIT](https://github.com/sandros94/h3-mcp-tools/blob/main/LICENSE) license.
+Made by [community](https://github.com/sandros94/h3-mcp-tools/graphs/contributors) 💛
 <br><br>
-<a href="https://github.com/sandros94/h3-mcp/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=sandros94/h3-mcp" />
+<a href="https://github.com/sandros94/h3-mcp-tools/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=sandros94/h3-mcp-tools" />
 </a>
 
 <!-- /automd -->

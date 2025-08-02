@@ -35,7 +35,7 @@ export class H3MCP extends H3 {
   ): void {
     if (this.toolsMap.has(definition.name)) {
       console.warn(
-        `[h3-mcp] Warning: Tool "${definition.name}" is being redefined.`,
+        `[h3-mcp-tools] Warning: Tool "${definition.name}" is being redefined.`,
       );
     }
     this.toolsMap.set(definition.name, {
