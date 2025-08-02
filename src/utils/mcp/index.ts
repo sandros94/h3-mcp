@@ -1,5 +1,5 @@
 import type { EventHandler } from "h3";
-import { jsonRpcHandler } from "../json-rpc.ts";
+import { defineJsonRpcHandler } from "../json-rpc.ts";
 
 import type { McpMethodMap } from "./tools.ts";
 
@@ -12,8 +12,6 @@ export * from "./tools.ts";
  * @param methods A map of JSON-RPC method names to their handlers.
  * @returns An H3 EventHandler that implements the MCP protocol.
  */
-export function mcpHandler<T = unknown, D = unknown>(
-  methods: McpMethodMap<T, D>,
-): EventHandler {
-  return jsonRpcHandler(methods);
+export function defineMcpHandler(methods: McpMethodMap): EventHandler {
+  return defineJsonRpcHandler(methods);
 }

@@ -1,10 +1,4 @@
-import {
-  type H3Event,
-  type EventHandler,
-  HTTPError,
-  readBody,
-  defineHandler,
-} from "h3";
+import { type H3Event, type EventHandler, defineHandler, HTTPError } from "h3";
 
 /**
  * JSON-RPC 2.0 Interfaces based on the specification.
@@ -14,17 +8,17 @@ import {
 /**
  * JSON-RPC 2.0 Request object.
  */
-interface JsonRpcRequest<T = unknown> {
+export interface JsonRpcRequest<I = unknown> {
   jsonrpc: "2.0";
   method: string;
-  params?: T;
-  id?: string | number | null;
+  params?: I;
+  id?: string | number | null | undefined;
 }
 
 /**
  * JSON-RPC 2.0 Error object.
  */
-interface JsonRpcError {
+export interface JsonRpcError {
   code: number;
   message: string;
   data?: any;
@@ -33,12 +27,33 @@ interface JsonRpcError {
 /**
  * JSON-RPC 2.0 Response object.
  */
-interface JsonRpcResponse<D = unknown> {
-  jsonrpc: "2.0";
-  result?: D;
-  error?: JsonRpcError;
-  id: string | number | null;
-}
+export type JsonRpcResponse<O = unknown> =
+  | {
+      jsonrpc: "2.0";
+      id: string | number | null;
+      result: O;
+      error?: undefined;
+    }
+  | {
+      jsonrpc: "2.0";
+      id: string | number | null;
+      error: JsonRpcError;
+      result?: undefined;
+    };
+
+/**
+ * A function that handles a JSON-RPC method call.
+ * It receives the parameters from the request and the original H3Event.
+ */
+export type JsonRpcMethodHandler<I = unknown, O = I> = (
+  data: JsonRpcRequest<I>,
+  event: H3Event,
+) => O | Promise<O>;
+
+/**
+ * A map of method names to their corresponding handler functions.
+ */
+export type JsonRpcMethodMap = Record<string, JsonRpcMethodHandler>;
 
 // Official JSON-RPC 2.0 error codes.
 /**
@@ -64,31 +79,22 @@ const INTERNAL_ERROR = -32_603;
 // -32_000 to -32_099 	Reserved for implementation-defined server-errors.
 
 /**
- * A function that handles a JSON-RPC method call.
- * It receives the parameters from the request and the original H3Event.
- */
-export type JsonRpcMethodHandler<T = unknown, D = unknown> = (
-  params: T,
-  event: H3Event,
-) => D | Promise<D>;
-
-/**
- * A map of method names to their corresponding handler functions.
- */
-export type JsonRpcMethodMap<T = unknown, D = unknown> = Record<
-  string,
-  JsonRpcMethodHandler<T, D>
->;
-
-/**
  * Creates an H3 event handler that implements the JSON-RPC 2.0 specification.
  *
  * @param methods A map of RPC method names to their handler functions.
  * @returns An H3 EventHandler.
+ *
+ * @example
+ * app.post("/rpc", defineJsonRpcHandler({
+ *   echo: ({ params }, event) => {
+ *     return `Recieved \`${params}\` on path \`${event.url.pathname}\``;
+ *   },
+ *   sum: ({ params }, event) => {
+ *     return params.a + params.b;
+ *   },
+ * }));
  */
-export function jsonRpcHandler<T = unknown, D = unknown>(
-  methods: JsonRpcMethodMap<T, D>,
-): EventHandler {
+export function defineJsonRpcHandler(methods: JsonRpcMethodMap): EventHandler {
   return defineHandler(async (event: H3Event) => {
     // JSON-RPC requests must be POST.
     if (event.req.method !== "POST") {
@@ -104,7 +110,7 @@ export function jsonRpcHandler<T = unknown, D = unknown>(
       code: number,
       message: string,
       data?: any,
-    ): JsonRpcResponse<D> => {
+    ): JsonRpcResponse => {
       const error: JsonRpcError = { code, message };
       if (data) {
         error.data = data;
@@ -114,25 +120,52 @@ export function jsonRpcHandler<T = unknown, D = unknown>(
 
     let hasErrored = false;
     let error = undefined;
-    const body = await readBody<JsonRpcRequest<T> | JsonRpcRequest<T>[]>(
-      event,
-    ).catch((error_) => {
+    const body = (await event.req.json().catch((error_) => {
       hasErrored = true;
       error = error_;
       return undefined;
-    });
+    })) as JsonRpcRequest | JsonRpcRequest[] | undefined;
 
-    if (hasErrored || !body) {
+    // Protect against prototype pollution
+    function hasUnsafeKeys(obj: any): boolean {
+      if (obj && typeof obj === "object") {
+        for (const key of Object.keys(obj)) {
+          if (
+            key === "__proto__" ||
+            key === "constructor" ||
+            key === "prototype"
+          ) {
+            return true;
+          }
+          if (
+            typeof obj[key] === "object" &&
+            obj[key] !== null &&
+            hasUnsafeKeys(obj[key])
+          ) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    if (
+      hasErrored ||
+      !body ||
+      (Array.isArray(body)
+        ? body.some((element) => hasUnsafeKeys(element))
+        : hasUnsafeKeys(body))
+    ) {
       return sendJsonRpcError(null, PARSE_ERROR, "Parse error", error);
     }
 
     const isBatch = Array.isArray(body);
-    const requests: JsonRpcRequest<T>[] = isBatch ? body : [body];
+    const requests: JsonRpcRequest[] = isBatch ? body : [body];
 
     // Processes a single JSON-RPC request.
     const processRequest = async (
-      req: JsonRpcRequest<T>,
-    ): Promise<JsonRpcResponse<D> | undefined> => {
+      req: JsonRpcRequest,
+    ): Promise<JsonRpcResponse | undefined> => {
       // Validate the request object.
       if (req.jsonrpc !== "2.0" || typeof req.method !== "string") {
         return sendJsonRpcError(
@@ -142,7 +175,7 @@ export function jsonRpcHandler<T = unknown, D = unknown>(
         );
       }
 
-      const { id, method, params } = req;
+      const { jsonrpc, id, method, params } = req;
       const handler = methods[method];
 
       // If the method is not found, return an error.
@@ -156,7 +189,7 @@ export function jsonRpcHandler<T = unknown, D = unknown>(
 
       // Execute the method handler.
       try {
-        const result = await handler(params || ({} as T), event);
+        const result = await handler({ jsonrpc, id, method, params }, event);
 
         // For notifications, we don't send a response.
         if (id !== undefined && id !== null) {
@@ -190,7 +223,7 @@ export function jsonRpcHandler<T = unknown, D = unknown>(
 
     // Filter out undefined results from notifications.
     const finalResponses = responses.filter(
-      (r): r is JsonRpcResponse<D> => r !== undefined,
+      (r): r is JsonRpcResponse => r !== undefined,
     );
 
     event.res.headers.set("Content-Type", "application/json");

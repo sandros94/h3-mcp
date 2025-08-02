@@ -2,7 +2,7 @@ import { H3, type H3Config } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 import type { McpTool, McpMethodMap } from "./utils/mcp/index.ts";
-import { mcpTools, mcpHandler } from "./utils/mcp/index.ts";
+import { mcpTools, defineMcpHandler } from "./utils/mcp/index.ts";
 import type {
   ServerInfo,
   Capabilities,
@@ -61,7 +61,7 @@ export class H3MCP extends H3 {
     };
 
     // Create the main JSON-RPC handler
-    const rpcHandler = mcpHandler(methods);
+    const rpcHandler = defineMcpHandler(methods);
 
     // Register the handler for all POST requests to /mcp.
     this.post("/mcp", rpcHandler);

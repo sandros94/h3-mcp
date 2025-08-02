@@ -2,7 +2,7 @@ import { type H3Event, HTTPError } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { toJsonSchema } from "@standard-community/standard-json";
 import type { ToolDefinition, ToolHandler } from "../../types/index.ts";
-import { type JsonRpcMethodMap } from "../json-rpc.ts";
+import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
 /**
  * A Map containing tool definitions and their corresponding handlers.
@@ -15,7 +15,7 @@ export interface McpTool<S extends StandardSchemaV1 = StandardSchemaV1> {
 /**
  * A Map of JSON-RPC methods for MCP tools, resources, and prompts.
  */
-export type McpMethodMap<T = unknown, D = unknown> = JsonRpcMethodMap<T, D>;
+export type McpMethodMap = JsonRpcMethodMap;
 
 /**
  * Creates a set of JSON-RPC methods for handling MCP tool interactions.
@@ -26,10 +26,7 @@ export type McpMethodMap<T = unknown, D = unknown> = JsonRpcMethodMap<T, D>;
  */
 export function mcpTools<S extends StandardSchemaV1>(
   tools: McpTool<S>[] | Map<string, McpTool<S>>,
-): JsonRpcMethodMap<
-  StandardSchemaV1.InferInput<S>,
-  StandardSchemaV1.InferOutput<S>
-> {
+): McpMethodMap {
   const toolsMap =
     tools instanceof Map
       ? tools
@@ -63,7 +60,8 @@ export function mcpTools<S extends StandardSchemaV1>(
    * RPC method: 'tools/call'
    * Runs a specific tool with the given arguments.
    */
-  async function runTool(params: unknown, event: H3Event) {
+  async function runTool(request: JsonRpcRequest, event: H3Event) {
+    const { params } = request;
     // Validate the parameters for running a tool
     if (
       typeof params !== "object" ||
