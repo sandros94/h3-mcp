@@ -180,6 +180,7 @@ app.tool(
 ## Credits
 
 Inspired by:
+
 - the official [ModelContextProtocol SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - Paolo Ricciuti's work on [tmcp](https://github.com/paoloricciuti/tmcp)
 
