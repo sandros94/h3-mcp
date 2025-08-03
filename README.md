@@ -25,9 +25,7 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 
 - [ ] Support for static resources definition
 - [ ] Support for prompt templates definition
-- [ ] Main `GET` endpoint, for:
-  - [ ] server capabilities
-  - [ ] notifications
+- [ ] Built-in SSE notifications
 
 ## Usage
 
@@ -162,6 +160,10 @@ app.tool(
   },
 );
 ```
+
+## Notes
+
+- There is no built-in support for SSE notifications, but you can implement it yourself by overriding the `app.get("/mcp")` method to return a stream of events.
 
 ## Development
 
