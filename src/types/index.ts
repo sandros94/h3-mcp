@@ -1,32 +1,69 @@
 import type { H3Event } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
-// Server Information
-export interface ServerInfo {
+// MCP Specification for client/server information
+export interface Implementation {
   name: string;
   version: string;
-  description: string;
+  title?: string;
+  description?: string;
 }
 
-// Capabilities
-export interface Capabilities {
-  capabilities?: {
-    tools?: { listChanged?: boolean };
-    prompts?: { listChanged?: boolean };
-    resources?: { listChanged?: boolean };
-  };
+// MCP Specification for server capabilities
+export interface ServerCapabilities {
+  tools?: { listChanged?: boolean };
+  prompts?: { listChanged?: boolean };
+  resources?: { listChanged?: boolean; subscribe?: boolean };
 }
 
-// Tool Definition
-export interface ToolDefinition<S extends StandardSchemaV1> {
+// MCP Specification for client capabilities
+export interface ClientCapabilities {
+  tools?: {};
+}
+
+// MCP Specification for a single tool
+export interface Tool<S extends StandardSchemaV1 = StandardSchemaV1> {
+  /**
+   * Unique identifier for the tool.
+   */
   name: string;
-  description: string;
-  schema?: S;
-  jsonSchema?: Record<string, unknown>; // Manual JSON Schema representation
+  /**
+   * Human-readable name of the tool.
+   */
+  title?: string;
+  description?: string;
+  schema?: S; // Standard Schema
+  jsonSchema?: Record<string, unknown>; // raw JSON Schema
 }
 
-// Tool Handler
+// Handler function for a tool
 export type ToolHandler<S extends StandardSchemaV1> = (
   data: StandardSchemaV1.InferOutput<S>,
   event: H3Event,
 ) => unknown | Promise<unknown>;
+
+// MCP Specification for content blocks in responses
+export interface ContentBlock {
+  type: "text" | "image" | "audio" | "resource_link" | "resource";
+  [key: string]: any;
+}
+
+// MCP Specification for the result of a tools/call
+export interface ToolCallResult {
+  content: ContentBlock[];
+  isError?: boolean;
+  structuredContent?: { [key: string]: any };
+}
+
+// MCP Specification for the initialize method
+export interface InitializeRequestParams {
+  protocolVersion: string;
+  capabilities: ClientCapabilities;
+  clientInfo: Implementation;
+}
+
+export interface InitializeResult {
+  protocolVersion: string;
+  capabilities: ServerCapabilities;
+  serverInfo: Implementation;
+}

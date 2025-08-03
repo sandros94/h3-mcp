@@ -1,14 +1,14 @@
 import { type H3Event, HTTPError } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { toJsonSchema } from "@standard-community/standard-json";
-import type { ToolDefinition, ToolHandler } from "../../types/index.ts";
+import type { Tool, ToolHandler } from "../../types/index.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
 /**
- * A Map containing tool definitions and their corresponding handlers.
+ * Tool definition and its corresponding handler.
  */
 export interface McpTool<S extends StandardSchemaV1 = StandardSchemaV1> {
-  definition: ToolDefinition<S>;
+  definition: Tool<S>;
   handler: ToolHandler<S>;
 }
 
@@ -24,25 +24,25 @@ export type McpMethodMap = JsonRpcMethodMap;
  * @param tools A Map of tool definitions and their handlers.
  * @returns A JsonRpcMethodMap to be used with `jsonRpcHandler`.
  */
-export function mcpTools<S extends StandardSchemaV1>(
-  tools: McpTool<S>[] | Map<string, McpTool<S>>,
+export function mcpToolsMethods(
+  tools: McpTool[] | Map<string, McpTool>,
 ): McpMethodMap {
   const toolsMap =
     tools instanceof Map
       ? tools
-      : new Map<string, McpTool<S>>(
+      : new Map<string, McpTool>(
           tools.map((tool) => [tool.definition.name, tool]),
         );
   /**
    * RPC method: 'tools/list'
    * Lists available tools and their schemas.
    */
-  async function listTools() {
-    return await Promise.all(
+  async function toolsList() {
+    const toolDefs = await Promise.all(
       [...toolsMap.values()].map(async ({ definition }) => ({
         name: definition.name,
         description: definition.description,
-        schema:
+        inputSchema:
           definition.jsonSchema ||
           (definition.schema
             ? await toJsonSchema(definition.schema).catch(() => {
@@ -54,13 +54,17 @@ export function mcpTools<S extends StandardSchemaV1>(
             : undefined),
       })),
     );
+
+    return {
+      tools: toolDefs,
+    };
   }
 
   /**
    * RPC method: 'tools/call'
    * Runs a specific tool with the given arguments.
    */
-  async function runTool(request: JsonRpcRequest, event: H3Event) {
+  async function toolsCall(request: JsonRpcRequest, event: H3Event) {
     const { params } = request;
     // Validate the parameters for running a tool
     if (
@@ -117,7 +121,7 @@ export function mcpTools<S extends StandardSchemaV1>(
   }
 
   return {
-    "tools/list": listTools,
-    "tools/call": runTool,
+    "tools/list": toolsList,
+    "tools/call": toolsCall,
   };
 }

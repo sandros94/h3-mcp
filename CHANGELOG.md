@@ -6,7 +6,7 @@
 
 ### 💅 Refactors
 
-- ⚠️  Json-rpc internal implementation ([f4dbfa6](https://github.com/sandros94/h3-mcp-tools/commit/f4dbfa6))
+- ⚠️ Json-rpc internal implementation ([f4dbfa6](https://github.com/sandros94/h3-mcp-tools/commit/f4dbfa6))
 
 ### 🏡 Chore
 
@@ -14,7 +14,7 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Json-rpc internal implementation ([f4dbfa6](https://github.com/sandros94/h3-mcp-tools/commit/f4dbfa6))
+- ⚠️ Json-rpc internal implementation ([f4dbfa6](https://github.com/sandros94/h3-mcp-tools/commit/f4dbfa6))
 
 ### ❤️ Contributors
 
