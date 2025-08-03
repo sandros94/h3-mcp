@@ -15,7 +15,7 @@ export interface McpTool<S extends StandardSchemaV1 = StandardSchemaV1> {
 /**
  * A Map of JSON-RPC methods for MCP tools, resources, and prompts.
  */
-export type McpMethodMap = JsonRpcMethodMap;
+export type McpToolMethodMap = JsonRpcMethodMap;
 
 /**
  * Creates a set of JSON-RPC methods for handling MCP tool interactions.
@@ -26,7 +26,7 @@ export type McpMethodMap = JsonRpcMethodMap;
  */
 export function mcpToolsMethods(
   tools: McpTool[] | Map<string, McpTool>,
-): McpMethodMap {
+): McpToolMethodMap {
   const toolsMap =
     tools instanceof Map
       ? tools

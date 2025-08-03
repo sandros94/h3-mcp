@@ -14,7 +14,7 @@ import type {
 import { mcpToolsMethods, type McpTool } from "./tools.ts";
 import { defineJsonRpcHandler, type JsonRpcRequest } from "../json-rpc.ts";
 
-import type { McpMethodMap } from "./tools.ts";
+import type { McpToolMethodMap } from "./tools.ts";
 
 export * from "./stream.ts";
 export * from "./tools.ts";
@@ -100,7 +100,7 @@ export function defineMcpHandler<
 
   const toolMethods = mcpToolsMethods(tools);
 
-  const allMethods: McpMethodMap = {
+  const allMethods: McpToolMethodMap = {
     // @ts-ignore `initialize` is a special method, not part of the tools
     initialize,
     "notifications/initialized": (data, event) => {
