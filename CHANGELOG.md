@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.0
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.1.0...v0.2.0)
+
+### 🚀 Enhancements
+
+- ⚠️  Initialize methods and middleware support ([01116eb](https://github.com/sandros94/h3-mcp-tools/commit/01116eb))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Initialize methods and middleware support ([01116eb](https://github.com/sandros94/h3-mcp-tools/commit/01116eb))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.1.0
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.0.2...v0.1.0)
