@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.1
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.0...v0.2.1)
+
+### 🚀 Enhancements
+
+- Streamable responses ([b73eb39](https://github.com/sandros94/h3-mcp-tools/commit/b73eb39))
+
+### 📖 Documentation
+
+- Update SSE caveats ([c8f3ded](https://github.com/sandros94/h3-mcp-tools/commit/c8f3ded))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.2.0
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.1.0...v0.2.0)
