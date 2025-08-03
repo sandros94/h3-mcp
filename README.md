@@ -25,7 +25,7 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 
 - [ ] Support for static resources definition
 - [ ] Support for prompt templates definition
-- [ ] Built-in SSE notifications
+- [ ] Built-in Streamable HTTP notifications hooks
 
 ## Usage
 
@@ -46,7 +46,7 @@ import * as v from "valibot";
 const app = new H3MCP({
   name: "My MCP Server",
   version: "1.0.0",
-  description: "A sample Model-as-a-Service server using H3 MCP",
+  description: "A sample MCP server built with H3",
 });
 
 app.tool(
@@ -132,7 +132,7 @@ You should receive a response like this:
 }
 ```
 
-#### JSON Schema
+### JSON Schema
 
 Only validation libraries supported by [`@standard-community/standard-json`](https://github.com/standard-community/standard-json) are automatically evaluated at runtime. For Valibot and Zod users you should also install the related json schema package (`@valibot/to-json-schema`, `zod-to-json-schema`).
 
@@ -161,9 +161,70 @@ app.tool(
 );
 ```
 
+### Streaming Responses
+
+While standard SSE (Server-Sent Events) are deprecated in the MCP specification, you can still implement streaming responses using `ReadableStream`. To make things simpler, you can use the `createMcpStream` utility function provided by this package.
+
+You can create a streamable response like this:
+
+```ts
+import { H3MCP, createMcpStream } from "h3-mcp-tools";
+import { serve } from "h3";
+import * as v from "valibot";
+
+const app = new H3MCP({
+  name: "My streamable MCP Server",
+  version: "1.0.0",
+  description: "A sample MCP server built with H3",
+});
+
+app.tool(
+  {
+    name: "stream",
+    description: "Streams the current time every second",
+    schema: v.optional(
+      v.object({
+        maxSeconds: v.optional(v.number()),
+      }),
+    ),
+  },
+  ({ maxSeconds } = {}, event, { id }) => {
+    let count = 0;
+    const max = maxSeconds ?? 10;
+
+    const stream = createMcpStream(event, {
+      async start(controller) {
+        for (let i = 0; i < max; i++) {
+          if (count < max) {
+            controller.enqueue(
+              new TextEncoder().encode(`Time: ${new Date().toISOString()}\n`),
+            );
+            count++;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      },
+      finalResponse: {
+        jsonrpc: "2.0",
+        id,
+        result: { message: "Stream completed" },
+      },
+    });
+
+    event.res.headers.set("Content-Type", "text/event-stream");
+
+    return stream;
+  },
+);
+
+serve(app);
+```
+
+If you include `finalResponse` in the `createMcpStream` options, it will be sent at the end of the stream, allowing you to send a complete JSON-RPC response with the `jsonrpc`, `id`, and `result` fields and the stream will be closed automatically.
+
 ## Notes
 
-- There is no built-in support for SSE notifications, but you can implement it yourself by overriding the `app.get("/mcp")` method to return a stream of events.
+- SSE have been marked as deprecated since MCP spec "2025-03-26", instead you should use `ReadableStream` for streaming responses with `Content-Type: text/event-stream` header. Please also note that you should send a full JSON-RPC response at the end of the stream, with the `jsonrpc`, `id` and `result` fields.
 
 ## Development
 

@@ -162,7 +162,7 @@ export function defineJsonRpcHandler<
     // Processes a single JSON-RPC request.
     const processRequest = async (
       req: JsonRpcRequest,
-    ): Promise<JsonRpcResponse | undefined> => {
+    ): Promise<JsonRpcResponse | ReadableStream | undefined> => {
       // Validate the request object.
       if (req.jsonrpc !== "2.0" || typeof req.method !== "string") {
         return createJsonRpcError(
@@ -187,6 +187,17 @@ export function defineJsonRpcHandler<
       // Execute the method handler.
       try {
         const result = await handler({ jsonrpc, id, method, params }, event);
+
+        if (isBatch && result instanceof ReadableStream) {
+          throw new HTTPError({
+            status: 400,
+            message: "Streaming responses are not supported in batch requests.",
+          });
+        }
+
+        if (result instanceof ReadableStream) {
+          return result;
+        }
 
         // For notifications, we don't send a response.
         if (id !== undefined && id !== null) {
@@ -222,6 +233,15 @@ export function defineJsonRpcHandler<
     const finalResponses = responses.filter(
       (r): r is JsonRpcResponse => r !== undefined,
     );
+
+    if (
+      !isBatch &&
+      finalResponses.length === 1 &&
+      finalResponses[0] instanceof ReadableStream
+    ) {
+      event.res.headers.set("Content-Type", "text/event-stream");
+      return finalResponses[0];
+    }
 
     event.res.headers.set("Content-Type", "application/json");
 

@@ -6,11 +6,11 @@
 
 ### 🚀 Enhancements
 
-- ⚠️  Initialize methods and middleware support ([01116eb](https://github.com/sandros94/h3-mcp-tools/commit/01116eb))
+- ⚠️ Initialize methods and middleware support ([01116eb](https://github.com/sandros94/h3-mcp-tools/commit/01116eb))
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Initialize methods and middleware support ([01116eb](https://github.com/sandros94/h3-mcp-tools/commit/01116eb))
+- ⚠️ Initialize methods and middleware support ([01116eb](https://github.com/sandros94/h3-mcp-tools/commit/01116eb))
 
 ### ❤️ Contributors
 

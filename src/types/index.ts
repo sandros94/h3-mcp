@@ -1,5 +1,6 @@
 import type { H3Event } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import type { JsonRpcRequest } from "../utils/json-rpc.ts";
 
 // MCP Specification for client/server information
 export interface Implementation {
@@ -40,6 +41,9 @@ export interface Tool<S extends StandardSchemaV1 = StandardSchemaV1> {
 export type ToolHandler<S extends StandardSchemaV1> = (
   data: StandardSchemaV1.InferOutput<S>,
   event: H3Event,
+  jsonrpc: Omit<JsonRpcRequest<StandardSchemaV1.InferInput<S>>, "id"> & {
+    id: string | number | null;
+  },
 ) => unknown | Promise<unknown>;
 
 // MCP Specification for content blocks in responses

@@ -16,6 +16,7 @@ import { defineJsonRpcHandler, type JsonRpcRequest } from "../json-rpc.ts";
 
 import type { McpMethodMap } from "./tools.ts";
 
+export * from "./stream.ts";
 export * from "./tools.ts";
 
 export interface DefineMcpHandlerOptions {

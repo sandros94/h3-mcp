@@ -65,7 +65,7 @@ export function mcpToolsMethods(
    * Runs a specific tool with the given arguments.
    */
   async function toolsCall(request: JsonRpcRequest, event: H3Event) {
-    const { params } = request;
+    const { params, jsonrpc, method, id = null } = request;
     // Validate the parameters for running a tool
     if (
       typeof params !== "object" ||
@@ -107,7 +107,12 @@ export function mcpToolsMethods(
     }
 
     try {
-      const result = await tool.handler(parseResult?.value, event);
+      const result = await tool.handler(parseResult?.value, event, {
+        jsonrpc,
+        id,
+        method,
+        params,
+      });
       return result;
     } catch (error) {
       // Re-throw execution errors as HTTPErrors so the jsonRpcHandler can catch them.
