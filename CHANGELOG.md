@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.3
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.2...v0.2.3)
+
+### 🩹 Fixes
+
+- Add shared handler for batch resource definition ([c7eb42d](https://github.com/sandros94/h3-mcp-tools/commit/c7eb42d))
+- Resources void handler, used as middleware ([68182f6](https://github.com/sandros94/h3-mcp-tools/commit/68182f6))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.2.2
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.1...v0.2.2)
