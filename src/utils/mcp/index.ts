@@ -142,7 +142,8 @@ export function defineMcpHandler<
 
       throw new HTTPError({
         status: 405,
-        message: "[mcp] Method Not Allowed. Currently `GET` (SSE) is not automatically supported.",
+        message:
+          "[mcp] Method Not Allowed. Currently `GET` (SSE) is not automatically supported.",
       });
     }
   });
