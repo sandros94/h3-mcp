@@ -19,7 +19,7 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
   - Simple Tool registration and invocation, allowing you to define tools with input validation.
   - Tool listing method to retrieve all registered tools.
 - Resources
-  - Support for static resources definition, allowing you to serve them statically. (batch definition via dedicated method)
+  - Support for static resources definition, allowing you to serve them statically. (also supports batch definition)
   - Support for dynamic resources, allowing you to define custom handlers for specific URIs.
   - Support for resource templates, allowing you to define dynamic URIs. (Completion API is still under development)
 
@@ -254,7 +254,7 @@ serve(app);
 
 #### Batch Resource Definition
 
-You can also define multiple resources at once using the `resources` method, which accepts an array of `Resource` objects:
+You can also define multiple resources at once using the `resource` method, which accepts an array of `Resource` objects and an optional handler, which will be shared among all resources:
 
 ```ts
 const remotelyFetchedResources = [
@@ -288,7 +288,10 @@ const remotelyFetchedResources = [
   },
 ];
 
-app.resources(remotelyFetchedResources);
+app.resource(remotelyFetchedResources, ({ uri }) => {
+  // uri = "foo", "bar" or "baz"
+  return { text: `This is a ${uri} resource` };
+});
 ```
 
 ## Notes

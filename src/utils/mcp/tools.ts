@@ -2,7 +2,7 @@ import { type H3Event, HTTPError } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { toJsonSchema } from "@standard-community/standard-json";
 import type { MaybePromise } from "../../types/utils.ts";
-import type { ListingHandler } from "../../types/index.ts";
+import type { ListingHandler, CallingHandler } from "../../types/index.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
 // MCP Specification for a single tool
@@ -51,16 +51,17 @@ export type McpToolMethodMap = JsonRpcMethodMap;
  */
 
 export function mcpToolsMethods(methods: {
-  toolsCall: Map<string, McpTool>;
+  tools: Map<string, McpTool>;
   toolsList?: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>;
+  toolsCall?: CallingHandler<{ name: string; arguments?: unknown }>;
 }): McpToolMethodMap {
   /**
    * RPC method: 'tools/list'
    * Lists available tools and their schemas, optionally using a custom handler.
    */
-  async function toolsListMethod(data: JsonRpcRequest, event: H3Event) {
+  async function toolsList(data: JsonRpcRequest, event: H3Event) {
     const toolDefs = await Promise.all(
-      [...methods.toolsCall.values()].map(async ({ definition }) => ({
+      [...methods.tools.values()].map(async ({ definition }) => ({
         name: definition.name,
         description: definition.description,
         inputSchema:
@@ -103,7 +104,12 @@ export function mcpToolsMethods(methods: {
    * Runs a specific tool with the given arguments.
    */
   async function toolsCall(request: JsonRpcRequest, event: H3Event) {
-    const { params, jsonrpc, method, id = null } = request;
+    const {
+      params,
+      jsonrpc,
+      method,
+      id = null,
+    } = request as JsonRpcRequest<{ name: string; arguments?: unknown }>;
     // Validate the parameters for running a tool
     if (
       typeof params !== "object" ||
@@ -119,9 +125,20 @@ export function mcpToolsMethods(methods: {
     }
 
     const toolName = params.name;
-    const tool = methods.toolsCall.get(toolName);
+    const tool = methods.tools.get(toolName);
 
     if (!tool) {
+      if (methods.toolsCall) {
+        const exec = await methods.toolsCall(params, event, {
+          jsonrpc,
+          id,
+          method,
+        });
+
+        if (exec && id !== null) {
+          return exec;
+        }
+      }
       throw new HTTPError({
         status: 404,
         message: `Tool "${toolName}" not found.`,
@@ -164,7 +181,7 @@ export function mcpToolsMethods(methods: {
   }
 
   return {
-    "tools/list": toolsListMethod,
+    "tools/list": toolsList,
     "tools/call": toolsCall,
   };
 }

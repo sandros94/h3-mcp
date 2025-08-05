@@ -118,6 +118,6 @@ const remotelyFetchedResources = [
   },
 ];
 
-app.resources(remotelyFetchedResources);
+app.resource(remotelyFetchedResources);
 
 serve(app);

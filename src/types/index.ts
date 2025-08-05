@@ -5,6 +5,10 @@ import type { JsonRpcRequest } from "../utils/json-rpc.ts";
 export type * from "../utils/mcp/resources.ts";
 export type * from "../utils/mcp/tools.ts";
 
+export type McpRpcRequest<I = unknown> = Omit<JsonRpcRequest<I>, "id"> & {
+  id: string | number | null;
+};
+
 // MCP Specification for client/server information
 export interface Implementation {
   name: string;
@@ -38,15 +42,20 @@ export interface InitializeResult {
   serverInfo: Implementation;
 }
 
+// Handler function for calling
+export type CallingHandler<I extends object, O = unknown> = (
+  data: I & Record<string, unknown>,
+  event: H3Event,
+  jsonrpc: McpRpcRequest,
+) => MaybePromise<O | ReadableStream | void>;
+
 // Handler function for listing
 export type ListingHandler<I extends object, O extends object = {}> = (
   data: I & {
     cursor: string | undefined;
   },
   event: H3Event,
-  jsonrpc: Omit<JsonRpcRequest, "id"> & {
-    id: string | number | null;
-  },
+  jsonrpc: McpRpcRequest,
 ) => MaybePromise<
   | Partial<O & { nextCursor?: string | undefined } & Record<string, unknown>>
   | ReadableStream

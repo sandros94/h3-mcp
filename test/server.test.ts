@@ -80,7 +80,7 @@ describe("H3MCP", () => {
           serverCapabilities: {
             tools: { listChanged: true },
           },
-          toolsCall: [
+          tools: [
             {
               definition: {
                 name: "ciao",

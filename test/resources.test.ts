@@ -52,11 +52,16 @@ describe("H3MCP", async () => {
       ).toString("base64"),
     },
   ];
-  app.resources(remotelyFetchedResources);
+  app.resource(remotelyFetchedResources);
   app.resourcesList(({ resources }) => {
+    const filteredResources = resources.map((r) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { blob, text, ..._resource } = r;
+      return _resource;
+    });
     return {
       resources: [
-        ...resources,
+        ...filteredResources,
         {
           uri: "Extra",
           name: "Extra Resource",
@@ -67,6 +72,18 @@ describe("H3MCP", async () => {
         },
       ],
     };
+  });
+  app.resourcesRead(async ({ uri }) => {
+    if (uri === "customResource") {
+      return {
+        uri: "customResource",
+        name: "Custom Resource",
+        title: "A custom resource for testing",
+        description: "This is a custom resource for testing purposes",
+        mimeType: "application/json",
+        text: "This is a custom resource",
+      };
+    }
   });
 
   describe("Resources", () => {
@@ -186,6 +203,38 @@ describe("H3MCP", async () => {
               description: "Returns a Baz message in base64",
               mimeType: "application/octet-stream",
               blob: "VGhpcyBpcyBhIEJheiByZXNvdXJjZQ==",
+            },
+          ],
+        },
+        id: 1,
+      });
+    });
+
+    it("should return a custom resource by URI", async () => {
+      const result = await app.request("/mcp", {
+        method: "POST",
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "resources/read",
+          params: {
+            uri: "customResource",
+          },
+          id: 1,
+        }),
+      });
+
+      const json = await result.json();
+      expect(json).toEqual({
+        jsonrpc: "2.0",
+        result: {
+          contents: [
+            {
+              uri: "customResource",
+              name: "Custom Resource",
+              title: "A custom resource for testing",
+              description: "This is a custom resource for testing purposes",
+              mimeType: "application/json",
+              text: "This is a custom resource",
             },
           ],
         },

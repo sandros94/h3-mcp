@@ -2,13 +2,16 @@ import { type H3Config, H3 } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { defineMcpHandler } from "./utils/mcp/index.ts";
 import type {
+  ResourceDef,
   Resource,
-  ResourceTemplate,
+  ResourceList,
   ResourceHandler,
+  ResourceTemplate,
+  ResourceTemplateList,
   McpResource,
   McpResourceTemplate,
 } from "./utils/mcp/resources.ts";
-import type { ListingHandler } from "./types/index.ts";
+import type { ListingHandler, CallingHandler } from "./types/index.ts";
 import type { Tool, ToolHandler, McpTool } from "./utils/mcp/tools.ts";
 import type { Implementation, ServerCapabilities } from "./types/index.ts";
 
@@ -20,16 +23,28 @@ export class H3MCP extends H3 {
   private info: Implementation;
   private capabilities: ServerCapabilities;
   private toolsMap = new Map<string, McpTool>();
+  private resourcesMap = new Map<string, McpResource>();
+  private resourceTemplatesMap = new Map<string, McpResourceTemplate>();
   private toolsListHandler?: ListingHandler<
     { tools: Tool[] },
     { tools: Tool[] }
   >;
-  private resourcesMap = new Map<string, McpResource>();
+  private toolsCallHandler?: CallingHandler<{
+    name: string;
+    arguments?: unknown;
+  }>;
   private resourcesListHandler?: ListingHandler<
-    { resources: Resource[] },
-    { resources: Resource[] }
+    { resources: ResourceDef[] },
+    ResourceList
   >;
-  private resourceTemplatesMap = new Map<string, McpResourceTemplate>();
+  private resourcesReadHandler?: CallingHandler<
+    { uri: string },
+    Resource | Resource[]
+  >;
+  private resourcesTemplatesListHandler?: ListingHandler<
+    { templates: ResourceTemplate[] },
+    ResourceTemplateList
+  >;
 
   constructor(
     info: Implementation,
@@ -45,42 +60,67 @@ export class H3MCP extends H3 {
     this.setupRoutes();
   }
 
-  public resource(definition: Resource, handler?: ResourceHandler): this {
-    if (this.resourcesMap.has(definition.uri)) {
-      console.warn(
-        `[h3-mcp] Warning: Resource "${definition.uri}" is being redefined.`,
-      );
+  public resource(definition: ResourceDef, handler?: ResourceHandler): this;
+  public resource(definition: ResourceDef[], handler?: ResourceHandler): this;
+  public resource(
+    definition: ResourceDef | ResourceDef[],
+    handler?: ResourceHandler,
+  ): this {
+    const def = Array.isArray(definition) ? definition : [definition];
+
+    for (const d of def) {
+      if (this.resourcesMap.has(d.uri)) {
+        console.warn(
+          `[h3-mcp] Warning: ResourceDef "${d.uri}" is being redefined.`,
+        );
+      }
+      this.resourcesMap.set(d.uri, {
+        ...d,
+        handler,
+      });
     }
-    this.resourcesMap.set(definition.uri, {
-      ...definition,
-      handler,
-    });
-    return this;
-  }
-  public resources(data: Resource[], handler?: ResourceHandler): this {
-    for (const resource of data) {
-      this.resource(resource, handler);
-    }
+
     return this;
   }
 
   public resourcesList(
-    handler: ListingHandler<
-      { resources: Resource[] },
-      { resources: Resource[] }
-    >,
+    handler: ListingHandler<{ resources: ResourceDef[] }, ResourceList>,
   ): this {
     this.resourcesListHandler = handler;
     return this;
   }
 
-  public resourceTemplate(definition: ResourceTemplate): this {
-    if (this.resourceTemplatesMap.has(definition.uriTemplate)) {
-      console.warn(
-        `[h3-mcp] Warning: Resource Template "${definition.uriTemplate}" is being redefined.`,
-      );
+  public resourcesRead(
+    handler: CallingHandler<{ uri: string }, Resource | Resource[]>,
+  ): this {
+    this.resourcesReadHandler = handler;
+    return this;
+  }
+
+  public resourceTemplate(definition: ResourceTemplate): this;
+  public resourceTemplate(definition: ResourceTemplate[]): this;
+  public resourceTemplate(
+    definition: ResourceTemplate | ResourceTemplate[],
+  ): this {
+    const templates = Array.isArray(definition) ? definition : [definition];
+    for (const template of templates) {
+      if (this.resourceTemplatesMap.has(template.uriTemplate)) {
+        console.warn(
+          `[h3-mcp] Warning: ResourceDef Template "${template.uriTemplate}" is being redefined.`,
+        );
+      }
+      this.resourceTemplatesMap.set(template.uriTemplate, template);
     }
-    this.resourceTemplatesMap.set(definition.uriTemplate, definition);
+    return this;
+  }
+
+  public resourcesTemplatesList(
+    handler: ListingHandler<
+      { templates: ResourceTemplate[] },
+      ResourceTemplateList
+    >,
+  ): this {
+    this.resourcesTemplatesListHandler = handler;
     return this;
   }
 
@@ -107,16 +147,26 @@ export class H3MCP extends H3 {
     return this;
   }
 
+  public toolsCall(
+    handler: CallingHandler<{ name: string; arguments?: unknown }>,
+  ): this {
+    this.toolsCallHandler = handler;
+    return this;
+  }
+
   private setupRoutes() {
     this.all("/mcp", (event) => {
       return defineMcpHandler({
-        resourcesRead: this.resourcesMap,
-        resourcesList: this.resourcesListHandler,
-        resourcesTemplatesList: this.resourceTemplatesMap,
-        toolsCall: this.toolsMap,
-        toolsList: this.toolsListHandler,
-        serverCapabilities: this.capabilities,
         serverInfo: this.info,
+        serverCapabilities: this.capabilities,
+        tools: this.toolsMap,
+        resources: this.resourcesMap,
+        resourcesTemplates: this.resourceTemplatesMap,
+        toolsList: this.toolsListHandler,
+        toolsCall: this.toolsCallHandler,
+        resourcesList: this.resourcesListHandler,
+        resourcesRead: this.resourcesReadHandler,
+        resourcesTemplatesList: this.resourcesTemplatesListHandler,
       })(event);
     });
   }

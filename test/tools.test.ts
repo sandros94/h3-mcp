@@ -32,6 +32,13 @@ describe("H3MCP", () => {
       ],
     };
   });
+  app.toolsCall(async (params) => {
+    if (params.name === "customTool") {
+      return {
+        result: `Custom tool called with args: ${JSON.stringify(params.arguments)}`,
+      };
+    }
+  });
 
   describe("Tools", () => {
     it("should list available tools", async () => {
@@ -90,6 +97,28 @@ describe("H3MCP", () => {
       expect(json).toEqual({
         jsonrpc: "2.0",
         result: { output: "You said: Hello, World!" },
+        id: 1,
+      });
+    });
+
+    it("should call custom tool", async () => {
+      const result = await app.request("/mcp", {
+        method: "POST",
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "tools/call",
+          params: {
+            name: "customTool",
+            arguments: { key: "value" },
+          },
+          id: 1,
+        }),
+      });
+
+      const json = await result.json();
+      expect(json).toEqual({
+        jsonrpc: "2.0",
+        result: { result: 'Custom tool called with args: {"key":"value"}' },
         id: 1,
       });
     });

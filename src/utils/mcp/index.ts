@@ -11,6 +11,7 @@ import type {
   InitializeRequestParams,
   InitializeResult,
   ListingHandler,
+  CallingHandler,
 } from "../../types/index.ts";
 import { defineJsonRpcHandler, type JsonRpcRequest } from "../json-rpc.ts";
 
@@ -18,7 +19,11 @@ import type {
   McpResource,
   McpResourceTemplate,
   McpResourceMethodMap,
+  ResourceDef,
   Resource,
+  ResourceList,
+  ResourceTemplate,
+  ResourceTemplateList,
 } from "./resources.ts";
 import { mcpResourcesMethods } from "./resources.ts";
 import type { McpTool, McpToolMethodMap, Tool } from "./tools.ts";
@@ -31,16 +36,17 @@ export interface DefineMcpHandlerOptions {
   serverInfo: Implementation;
   serverCapabilities: ServerCapabilities;
   middleware?: Middleware[];
-  toolsCall?: McpTool[] | Map<string, McpTool>;
+  tools?: McpTool[] | Map<string, McpTool>;
+  resources?: McpResource[] | Map<string, McpResource>;
+  resourcesTemplates?: McpResourceTemplate[] | Map<string, McpResourceTemplate>;
   toolsList?: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>;
-  resourcesRead?: McpResource[] | Map<string, McpResource>;
-  resourcesList?: ListingHandler<
-    { resources: Resource[] },
-    { resources: Resource[] }
+  toolsCall?: CallingHandler<{ name: string; arguments?: unknown }>;
+  resourcesList?: ListingHandler<{ resources: ResourceDef[] }, ResourceList>;
+  resourcesRead?: CallingHandler<{ uri: string }, Resource | Resource[]>;
+  resourcesTemplatesList?: ListingHandler<
+    { templates: ResourceTemplate[] },
+    ResourceTemplateList
   >;
-  resourcesTemplatesList?:
-    | McpResourceTemplate[]
-    | Map<string, McpResourceTemplate>;
 }
 
 export function defineMcpHandler<
@@ -51,25 +57,27 @@ export function defineMcpHandler<
     serverCapabilities,
     middleware,
     toolsList,
+    toolsCall,
     resourcesList,
+    resourcesRead,
+    resourcesTemplatesList,
   } = options;
 
   // --- START: Maps ---
-  const toolsCall =
-    !options.toolsCall || options.toolsCall instanceof Map
-      ? (options.toolsCall ?? new Map())
-      : new Map(options.toolsCall.map((t) => [t.definition.name, t]));
+  const tools =
+    !options.tools || options.tools instanceof Map
+      ? (options.tools ?? new Map())
+      : new Map(options.tools.map((t) => [t.definition.name, t]));
 
-  const resourcesRead =
-    !options.resourcesRead || options.resourcesRead instanceof Map
-      ? (options.resourcesRead ?? new Map())
-      : new Map(options.resourcesRead.map((r) => [r.uri, r]));
+  const resources =
+    !options.resources || options.resources instanceof Map
+      ? (options.resources ?? new Map())
+      : new Map(options.resources.map((r) => [r.uri, r]));
 
-  const resourcesTemplatesList =
-    !options.resourcesTemplatesList ||
-    options.resourcesTemplatesList instanceof Map
-      ? (options.resourcesTemplatesList ?? new Map())
-      : new Map(options.resourcesTemplatesList.map((t) => [t.name, t]));
+  const resourcesTemplates =
+    !options.resourcesTemplates || options.resourcesTemplates instanceof Map
+      ? (options.resourcesTemplates ?? new Map())
+      : new Map(options.resourcesTemplates.map((t) => [t.name, t]));
   // --- END: Maps ---
 
   (middleware || []).push((event) => {
@@ -138,18 +146,20 @@ export function defineMcpHandler<
       protocolVersion: negotiatedVersion,
       capabilities: {
         ...serverCapabilities,
-        tools: toolsCall.size > 0 ? {} : undefined,
-        resources: resourcesRead.size > 0 ? {} : undefined,
+        tools: tools.size > 0 ? {} : undefined,
+        resources: resources.size > 0 ? {} : undefined,
       },
     };
   }
 
   const resourceMethods = mcpResourcesMethods({
-    resourcesRead,
+    resources,
+    resourcesTemplates,
     resourcesList,
+    resourcesRead,
     resourcesTemplatesList,
   });
-  const toolMethods = mcpToolsMethods({ toolsCall, toolsList });
+  const toolMethods = mcpToolsMethods({ tools, toolsList, toolsCall });
 
   const allMethods: McpToolMethodMap | McpResourceMethodMap = {
     // @ts-ignore `initialize` is a special method, not part of the tools
