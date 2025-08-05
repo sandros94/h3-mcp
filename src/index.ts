@@ -8,6 +8,7 @@ import type {
   McpResource,
   McpResourceTemplate,
 } from "./utils/mcp/resources.ts";
+import type { ListingHandler } from "./types/index.ts";
 import type { Tool, ToolHandler, McpTool } from "./utils/mcp/tools.ts";
 import type { Implementation, ServerCapabilities } from "./types/index.ts";
 
@@ -19,7 +20,15 @@ export class H3MCP extends H3 {
   private info: Implementation;
   private capabilities: ServerCapabilities;
   private toolsMap = new Map<string, McpTool>();
+  private toolsListHandler?: ListingHandler<
+    { tools: Tool[] },
+    { tools: Tool[] }
+  >;
   private resourcesMap = new Map<string, McpResource>();
+  private resourcesListHandler?: ListingHandler<
+    { resources: Resource[] },
+    { resources: Resource[] }
+  >;
   private resourceTemplatesMap = new Map<string, McpResourceTemplate>();
 
   constructor(
@@ -55,6 +64,16 @@ export class H3MCP extends H3 {
     return this;
   }
 
+  public resourcesList(
+    handler: ListingHandler<
+      { resources: Resource[] },
+      { resources: Resource[] }
+    >,
+  ): this {
+    this.resourcesListHandler = handler;
+    return this;
+  }
+
   public resourceTemplate(definition: ResourceTemplate): this {
     if (this.resourceTemplatesMap.has(definition.uriTemplate)) {
       console.warn(
@@ -81,14 +100,24 @@ export class H3MCP extends H3 {
     return this;
   }
 
-  private setupRoutes() {
-    const mcpHandler = defineMcpHandler({
-      resources: this.resourcesMap,
-      tools: this.toolsMap,
-      serverCapabilities: this.capabilities,
-      serverInfo: this.info,
-    });
+  public toolsList(
+    handler: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>,
+  ): this {
+    this.toolsListHandler = handler;
+    return this;
+  }
 
-    this.all("/mcp", mcpHandler);
+  private setupRoutes() {
+    this.all("/mcp", (event) => {
+      return defineMcpHandler({
+        resourcesRead: this.resourcesMap,
+        resourcesList: this.resourcesListHandler,
+        resourcesTemplatesList: this.resourceTemplatesMap,
+        toolsCall: this.toolsMap,
+        toolsList: this.toolsListHandler,
+        serverCapabilities: this.capabilities,
+        serverInfo: this.info,
+      })(event);
+    });
   }
 }

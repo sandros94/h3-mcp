@@ -21,6 +21,17 @@ describe("H3MCP", () => {
       return { output: `You said: ${input}` };
     },
   );
+  app.toolsList(({ tools }) => {
+    return {
+      tools: [
+        ...tools,
+        {
+          name: "testTool",
+          description: "A test tool",
+        },
+      ],
+    };
+  });
 
   describe("Tools", () => {
     it("should list available tools", async () => {
@@ -50,6 +61,10 @@ describe("H3MCP", () => {
                 },
                 required: ["input"],
               },
+            },
+            {
+              name: "testTool",
+              description: "A test tool",
             },
           ],
         },

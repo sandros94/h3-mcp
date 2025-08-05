@@ -1,3 +1,7 @@
+import type { H3Event } from "h3";
+import type { MaybePromise } from "./utils.ts";
+import type { JsonRpcRequest } from "../utils/json-rpc.ts";
+
 export type * from "../utils/mcp/resources.ts";
 export type * from "../utils/mcp/tools.ts";
 
@@ -21,19 +25,6 @@ export interface ClientCapabilities {
   tools?: {};
 }
 
-// MCP Specification for content blocks in responses
-export interface ContentBlock {
-  type: "text" | "image" | "audio" | "resource_link" | "resource";
-  [key: string]: any;
-}
-
-// MCP Specification for the result of a tools/call
-export interface ToolCallResult {
-  content: ContentBlock[];
-  isError?: boolean;
-  structuredContent?: { [key: string]: any };
-}
-
 // MCP Specification for the initialize method
 export interface InitializeRequestParams {
   protocolVersion: string;
@@ -46,3 +37,18 @@ export interface InitializeResult {
   capabilities: ServerCapabilities;
   serverInfo: Implementation;
 }
+
+// Handler function for listing
+export type ListingHandler<I extends object, O extends object = {}> = (
+  data: I & {
+    cursor: string | undefined;
+  },
+  event: H3Event,
+  jsonrpc: Omit<JsonRpcRequest, "id"> & {
+    id: string | number | null;
+  },
+) => MaybePromise<
+  | Partial<O & { nextCursor?: string | undefined } & Record<string, unknown>>
+  | ReadableStream
+  | void
+>;

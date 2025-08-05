@@ -2,6 +2,7 @@ import { type H3Event, HTTPError } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { toJsonSchema } from "@standard-community/standard-json";
 import type { MaybePromise } from "../../types/utils.ts";
+import type { ListingHandler } from "../../types/index.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
 // MCP Specification for a single tool
@@ -48,20 +49,23 @@ export type McpToolMethodMap = JsonRpcMethodMap;
  * @param tools A Map of tool definitions and their handlers.
  * @returns A JsonRpcMethodMap to be used with `jsonRpcHandler`.
  */
-export function mcpToolsMethods(
-  tools: McpTool[] | Map<string, McpTool>,
-): McpToolMethodMap {
+
+export function mcpToolsMethods(methods: {
+  toolsCall: McpTool[] | Map<string, McpTool>;
+  toolsList?: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>;
+}): McpToolMethodMap {
   const toolsMap =
-    tools instanceof Map
-      ? tools
+    methods.toolsCall instanceof Map
+      ? methods.toolsCall
       : new Map<string, McpTool>(
-          tools.map((tool) => [tool.definition.name, tool]),
+          methods.toolsCall.map((tool) => [tool.definition.name, tool]),
         );
+
   /**
    * RPC method: 'tools/list'
-   * Lists available tools and their schemas.
+   * Lists available tools and their schemas, optionally using a custom handler.
    */
-  async function toolsList() {
+  async function toolsListMethod(data: JsonRpcRequest, event: H3Event) {
     const toolDefs = await Promise.all(
       [...toolsMap.values()].map(async ({ definition }) => ({
         name: definition.name,
@@ -78,6 +82,23 @@ export function mcpToolsMethods(
             : undefined),
       })),
     );
+
+    if (methods.toolsList) {
+      // Provide a cursor if present, else default
+      let cursor: string | undefined = undefined;
+      if (
+        data.params &&
+        typeof data.params === "object" &&
+        "cursor" in data.params &&
+        typeof data.params.cursor === "string"
+      ) {
+        cursor = data.params.cursor;
+      }
+      return methods.toolsList({ cursor, tools: toolDefs }, event, {
+        ...data,
+        id: data.id ?? null,
+      });
+    }
 
     return {
       tools: toolDefs,
@@ -150,7 +171,7 @@ export function mcpToolsMethods(
   }
 
   return {
-    "tools/list": toolsList,
+    "tools/list": toolsListMethod,
     "tools/call": toolsCall,
   };
 }

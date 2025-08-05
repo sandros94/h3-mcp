@@ -1,5 +1,6 @@
 import { HTTPError } from "h3";
 import type { H3Event } from "h3";
+import type { ListingHandler } from "../../types/index.ts";
 import type { ParseType, MaybePromise } from "../../types/utils.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
@@ -61,32 +62,51 @@ export type McpResourceTemplate = ResourceTemplate;
 
 export type McpResourceMethodMap = JsonRpcMethodMap;
 
-export function mcpResourcesMethods(
-  resources: McpResource[] | Map<string, McpResource>,
-  templates?: McpResourceTemplate[] | Map<string, McpResourceTemplate>,
-): McpResourceMethodMap {
+export function mcpResourcesMethods(methods: {
+  resourcesRead: McpResource[] | Map<string, McpResource>;
+  resourcesList?: ListingHandler<
+    { resources: Resource[] },
+    { resources: Resource[] }
+  >;
+  resourcesTemplatesList?:
+    | McpResourceTemplate[]
+    | Map<string, McpResourceTemplate>;
+}): McpResourceMethodMap {
   const resourcesMap =
-    resources instanceof Map
-      ? resources
-      : new Map(resources.map((r) => [r.name, r]));
+    methods.resourcesRead instanceof Map
+      ? methods.resourcesRead
+      : new Map(methods.resourcesRead.map((r) => [r.name, r]));
 
-  const templatesMap = templates
-    ? templates instanceof Map
-      ? templates
-      : new Map(templates.map((t) => [t.name, t]))
+  const templatesMap = methods.resourcesTemplatesList
+    ? methods.resourcesTemplatesList instanceof Map
+      ? methods.resourcesTemplatesList
+      : new Map(methods.resourcesTemplatesList.map((t) => [t.name, t]))
     : new Map();
 
   // List resources
-  function resourcesList(request: JsonRpcRequest) {
-    const { cursor } = (request.params || {}) as { cursor?: string };
+  async function resourcesList(data: JsonRpcRequest, event: H3Event) {
+    const { cursor } = (data.params || {}) as { cursor?: string };
+    const _resources = [...resourcesMap.values()].map((r) => ({
+      uri: r.uri,
+      name: r.name,
+      title: r.title,
+      description: r.description,
+      mimeType: r.mimeType,
+    }));
+
+    if (methods.resourcesList) {
+      return await methods.resourcesList(
+        { cursor, resources: _resources },
+        event,
+        {
+          ...data,
+          id: data.id ?? null,
+        },
+      );
+    }
+
     return {
-      resources: [...resourcesMap.values()].map((r) => ({
-        uri: r.uri,
-        name: r.name,
-        title: r.title,
-        description: r.description,
-        mimeType: r.mimeType,
-      })),
+      resources: _resources,
       cursor,
     };
   }

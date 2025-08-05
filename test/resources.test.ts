@@ -53,6 +53,21 @@ describe("H3MCP", async () => {
     },
   ];
   app.resources(remotelyFetchedResources);
+  app.resourcesList(({ resources }) => {
+    return {
+      resources: [
+        ...resources,
+        {
+          uri: "Extra",
+          name: "Extra Resource",
+          title: "An extra resource for testing",
+          description: "This is an extra resource added for testing purposes",
+          mimeType: "application/json",
+          text: "This is an extra resource",
+        },
+      ],
+    };
+  });
 
   describe("Resources", () => {
     it("should list available resources", async () => {
@@ -98,6 +113,15 @@ describe("H3MCP", async () => {
               title: "A resource that returns a base64 Baz",
               description: "Returns a Baz message in base64",
               mimeType: "application/octet-stream",
+            },
+            {
+              uri: "Extra",
+              name: "Extra Resource",
+              title: "An extra resource for testing",
+              description:
+                "This is an extra resource added for testing purposes",
+              mimeType: "application/json",
+              text: "This is an extra resource",
             },
           ],
         },
