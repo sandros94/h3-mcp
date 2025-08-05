@@ -74,4 +74,17 @@ app.tool(
   },
 );
 
+app.resource(
+  {
+    uri: "World",
+    name: "Hello Resource",
+    title: "A simple resource that returns a greeting",
+    description: "Returns a greeting message",
+    mimeType: "application/json",
+  },
+  async ({ uri }) => {
+    return { text: `Hello, ${uri}!` };
+  },
+);
+
 serve(app);

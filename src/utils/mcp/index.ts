@@ -11,25 +11,40 @@ import type {
   InitializeRequestParams,
   InitializeResult,
 } from "../../types/index.ts";
-import { mcpToolsMethods, type McpTool } from "./tools.ts";
 import { defineJsonRpcHandler, type JsonRpcRequest } from "../json-rpc.ts";
 
-import type { McpToolMethodMap } from "./tools.ts";
+import type {
+  McpResource,
+  McpResourceTemplate,
+  McpResourceMethodMap,
+} from "./resources.ts";
+import { mcpResourcesMethods } from "./resources.ts";
+import type { McpTool, McpToolMethodMap } from "./tools.ts";
+import { mcpToolsMethods } from "./tools.ts";
 
 export * from "./stream.ts";
 export * from "./tools.ts";
 
 export interface DefineMcpHandlerOptions {
-  tools: McpTool[] | Map<string, McpTool>;
-  serverCapabilities: ServerCapabilities;
   serverInfo: Implementation;
+  serverCapabilities: ServerCapabilities;
   middleware?: Middleware[];
+  tools?: McpTool[] | Map<string, McpTool>;
+  resources?: McpResource[] | Map<string, McpResource>;
+  resourceTemplates?: McpResourceTemplate[] | Map<string, McpResourceTemplate>;
 }
 
 export function defineMcpHandler<
   RequestT extends EventHandlerRequest = EventHandlerRequest,
 >(options: DefineMcpHandlerOptions): EventHandler<RequestT> {
-  const { tools, serverCapabilities, serverInfo, middleware } = options;
+  const {
+    serverInfo,
+    serverCapabilities,
+    middleware,
+    tools = new Map<string, McpTool>(),
+    resources = new Map<string, McpResource>(),
+    resourceTemplates = new Map<string, McpResourceTemplate>(),
+  } = options;
   (middleware || []).push((event) => {
     if (!isMethod(event, ["POST", "GET", "DELETE"])) {
       throw new HTTPError({
@@ -92,15 +107,26 @@ export function defineMcpHandler<
     );
 
     return {
-      protocolVersion: negotiatedVersion,
-      capabilities: serverCapabilities,
       serverInfo,
+      protocolVersion: negotiatedVersion,
+      capabilities: {
+        ...serverCapabilities,
+        tools: (tools instanceof Map ? tools.size > 0 : tools.length > 0)
+          ? {}
+          : undefined,
+        resources: (
+          resources instanceof Map ? resources.size > 0 : resources.length > 0
+        )
+          ? {}
+          : undefined,
+      },
     };
   }
 
+  const resourceMethods = mcpResourcesMethods(resources, resourceTemplates);
   const toolMethods = mcpToolsMethods(tools);
 
-  const allMethods: McpToolMethodMap = {
+  const allMethods: McpToolMethodMap | McpResourceMethodMap = {
     // @ts-ignore `initialize` is a special method, not part of the tools
     initialize,
     "notifications/initialized": (data, event) => {
@@ -118,8 +144,9 @@ export function defineMcpHandler<
       event.res.status = 202; // Accepted
       return "";
     },
+    ...resourceMethods,
     ...toolMethods,
-    // TODO: Add methods for prompts and resources
+    // TODO: Add methods for prompts
   };
 
   return defineJsonRpcHandler(allMethods, middleware);

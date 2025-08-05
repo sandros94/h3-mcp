@@ -1,8 +1,32 @@
 import { type H3Event, HTTPError } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { toJsonSchema } from "@standard-community/standard-json";
-import type { Tool, ToolHandler } from "../../types/index.ts";
+import type { MaybePromise } from "../../types/utils.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
+
+// MCP Specification for a single tool
+export interface Tool<S extends StandardSchemaV1 = StandardSchemaV1> {
+  /**
+   * Unique identifier for the tool.
+   */
+  name: string;
+  /**
+   * Human-readable name of the tool.
+   */
+  title?: string;
+  description?: string;
+  schema?: S; // Standard Schema
+  jsonSchema?: Record<string, unknown>; // raw JSON Schema
+}
+
+// Handler function for a tool
+export type ToolHandler<S extends StandardSchemaV1> = (
+  data: StandardSchemaV1.InferOutput<S>,
+  event: H3Event,
+  jsonrpc: Omit<JsonRpcRequest<StandardSchemaV1.InferInput<S>>, "id"> & {
+    id: string | number | null;
+  },
+) => MaybePromise<unknown>;
 
 /**
  * Tool definition and its corresponding handler.

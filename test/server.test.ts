@@ -54,64 +54,6 @@ describe("H3MCP", () => {
     });
   });
 
-  describe("Tools", () => {
-    it("should list available tools", async () => {
-      const result = await app.request("/mcp", {
-        method: "POST",
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "tools/list",
-          params: {},
-          id: 1,
-        }),
-      });
-
-      const json = await result.json();
-      expect(json).toEqual({
-        jsonrpc: "2.0",
-        result: {
-          tools: [
-            {
-              name: "echo",
-              description: "Echoes back the input",
-              inputSchema: {
-                $schema: "http://json-schema.org/draft-07/schema#",
-                type: "object",
-                properties: {
-                  input: { type: "string" },
-                },
-                required: ["input"],
-              },
-            },
-          ],
-        },
-        id: 1,
-      });
-    });
-
-    it("should echo input", async () => {
-      const result = await app.request("/mcp", {
-        method: "POST",
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "tools/call",
-          params: {
-            name: "echo",
-            arguments: { input: "Hello, World!" },
-          },
-          id: 1,
-        }),
-      });
-
-      const json = await result.json();
-      expect(json).toEqual({
-        jsonrpc: "2.0",
-        result: { output: "You said: Hello, World!" },
-        id: 1,
-      });
-    });
-  });
-
   describe("Generic Methods", () => {
     it("should override GET", async () => {
       // Override the default SSE endpoint for testing

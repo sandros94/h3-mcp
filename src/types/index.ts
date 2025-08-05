@@ -1,6 +1,5 @@
-import type { H3Event } from "h3";
-import type { StandardSchemaV1 } from "@standard-schema/spec";
-import type { JsonRpcRequest } from "../utils/json-rpc.ts";
+export type * from "../utils/mcp/resources.ts";
+export type * from "../utils/mcp/tools.ts";
 
 // MCP Specification for client/server information
 export interface Implementation {
@@ -21,30 +20,6 @@ export interface ServerCapabilities {
 export interface ClientCapabilities {
   tools?: {};
 }
-
-// MCP Specification for a single tool
-export interface Tool<S extends StandardSchemaV1 = StandardSchemaV1> {
-  /**
-   * Unique identifier for the tool.
-   */
-  name: string;
-  /**
-   * Human-readable name of the tool.
-   */
-  title?: string;
-  description?: string;
-  schema?: S; // Standard Schema
-  jsonSchema?: Record<string, unknown>; // raw JSON Schema
-}
-
-// Handler function for a tool
-export type ToolHandler<S extends StandardSchemaV1> = (
-  data: StandardSchemaV1.InferOutput<S>,
-  event: H3Event,
-  jsonrpc: Omit<JsonRpcRequest<StandardSchemaV1.InferInput<S>>, "id"> & {
-    id: string | number | null;
-  },
-) => unknown | Promise<unknown>;
 
 // MCP Specification for content blocks in responses
 export interface ContentBlock {
