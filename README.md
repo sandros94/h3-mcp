@@ -259,7 +259,7 @@ You can also define multiple resources at once using the `resources` method, whi
 ```ts
 const remotelyFetchedResources = [
   {
-    uri: "foo",  // URI must be defined and unique
+    uri: "foo", // URI must be defined and unique
     name: "Foo Resource",
     title: "A resource that returns Foo",
     description: "Returns a Foo message",
@@ -267,7 +267,7 @@ const remotelyFetchedResources = [
     text: "This is a Foo resource",
   },
   {
-    uri: "bar",  // URI must be defined and unique
+    uri: "bar", // URI must be defined and unique
     name: "Bar Resource",
     title: "A resource that returns Bar",
     description: "Returns a Bar message",
@@ -275,7 +275,7 @@ const remotelyFetchedResources = [
     text: "This is a Bar resource",
   },
   {
-    uri: "baz",  // URI must be defined and unique
+    uri: "baz", // URI must be defined and unique
     name: "Baz Resource",
     title: "A resource that returns a base64 Baz",
     description: "Returns a Baz message in base64",
