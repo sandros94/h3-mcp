@@ -11,7 +11,7 @@
 ### 💅 Refactors
 
 - Only use Maps for internal utilities ([01d8efc](https://github.com/sandros94/h3-mcp-tools/commit/01d8efc))
-- ⚠️  Improve API standardization and add `toolsCall`, `resourcesRead` and `resourcesTemplatesList` methods ([d834ec9](https://github.com/sandros94/h3-mcp-tools/commit/d834ec9))
+- ⚠️ Improve API standardization and add `toolsCall`, `resourcesRead` and `resourcesTemplatesList` methods ([d834ec9](https://github.com/sandros94/h3-mcp-tools/commit/d834ec9))
 - Enhance MCP types and handlers with documentation and improved structure ([4c932c1](https://github.com/sandros94/h3-mcp-tools/commit/4c932c1))
 
 ### 📖 Documentation
@@ -24,7 +24,7 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Improve API standardization and add `toolsCall`, `resourcesRead` and `resourcesTemplatesList` methods ([d834ec9](https://github.com/sandros94/h3-mcp-tools/commit/d834ec9))
+- ⚠️ Improve API standardization and add `toolsCall`, `resourcesRead` and `resourcesTemplatesList` methods ([d834ec9](https://github.com/sandros94/h3-mcp-tools/commit/d834ec9))
 
 ### ❤️ Contributors
 
