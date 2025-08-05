@@ -129,7 +129,6 @@ export type ListingHandler<I extends object, O extends object = {}> = (
   },
   event: H3Event,
   jsonrpc: McpRpcRequest,
-) => MaybePromise<
-  | Partial<O & { nextCursor?: string | undefined } & Record<string, unknown>>
-  | void
->;
+) => MaybePromise<Partial<
+  O & { nextCursor?: string | undefined } & Record<string, unknown>
+> | void>;

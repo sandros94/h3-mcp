@@ -39,9 +39,11 @@ export type ToolList = ParseType<{
   /**
    * An array of resource definitions.
    */
-  tools: ParseType<Omit<Tool, "schema" | "jsonSchema"> & {
-    inputSchema?: Record<string, unknown>;
-  }>[];
+  tools: ParseType<
+    Omit<Tool, "schema" | "jsonSchema"> & {
+      inputSchema?: Record<string, unknown>;
+    }
+  >[];
   /**
    * A cursor for pagination.
    */

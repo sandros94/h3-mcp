@@ -167,8 +167,8 @@ export type McpResource = ParseType<
 export type McpResourceTemplate = ResourceTemplate;
 
 /**
-* A map of JSON-RPC methods for MCP resources.
-*/
+ * A map of JSON-RPC methods for MCP resources.
+ */
 export type McpResourceMethodMap = JsonRpcMethodMap;
 
 /**

@@ -12,7 +12,12 @@ import type {
   McpResourceTemplate,
 } from "./utils/mcp/resources.ts";
 import type { ListingHandler, CallingHandler } from "./types/index.ts";
-import type { Tool, ToolList, McpTool, ToolHandler } from "./utils/mcp/tools.ts";
+import type {
+  Tool,
+  ToolList,
+  McpTool,
+  ToolHandler,
+} from "./utils/mcp/tools.ts";
 import type { Implementation, ServerCapabilities } from "./types/index.ts";
 
 export * from "./types/index.ts";
@@ -47,10 +52,7 @@ export class H3MCP extends H3 {
   /**
    * An optional handler for listing tools.
    */
-  private toolsListHandler?: ListingHandler<
-    { tools: Tool[] },
-    ToolList
-  >;
+  private toolsListHandler?: ListingHandler<{ tools: Tool[] }, ToolList>;
   /**
    * An optional handler for calling tools.
    */
@@ -229,9 +231,7 @@ export class H3MCP extends H3 {
    * @param handler The handler function for listing tools.
    * @returns The H3MCP instance for chaining.
    */
-  public toolsList(
-    handler: ListingHandler<{ tools: Tool[] }, ToolList>,
-  ): this {
+  public toolsList(handler: ListingHandler<{ tools: Tool[] }, ToolList>): this {
     this.toolsListHandler = handler;
     return this;
   }
