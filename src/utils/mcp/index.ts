@@ -186,9 +186,9 @@ export function defineMcpHandler<
       serverInfo,
       protocolVersion: negotiatedVersion,
       capabilities: {
-        ...serverCapabilities,
         tools: tools.size > 0 ? {} : undefined,
         resources: resources.size > 0 ? {} : undefined,
+        ...serverCapabilities,
       },
     };
   }
