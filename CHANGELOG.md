@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.1
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.3.0...v0.3.1)
+
+### 🩹 Fixes
+
+- Server capabilities definition order ([3b3e2e5](https://github.com/sandros94/h3-mcp-tools/commit/3b3e2e5))
+
+### 🏡 Chore
+
+- Apply automated updates ([424e272](https://github.com/sandros94/h3-mcp-tools/commit/424e272))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.3.0
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.3...v0.3.0)
