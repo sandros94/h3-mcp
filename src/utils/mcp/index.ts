@@ -125,7 +125,7 @@ export function defineMcpHandler<
     if (!isMethod(event, ["POST", "GET", "DELETE"])) {
       throw new HTTPError({
         status: 405,
-        message: "Method Not Allowed",
+        message: "[mcp] Method Not Allowed.",
       });
     }
 
@@ -142,7 +142,7 @@ export function defineMcpHandler<
 
       throw new HTTPError({
         status: 405,
-        message: "Method Not Allowed",
+        message: "[mcp] Method Not Allowed. Currently `GET` (SSE) is not automatically supported.",
       });
     }
   });
