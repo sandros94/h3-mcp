@@ -48,9 +48,9 @@ export class H3MCP extends H3 {
     });
     return this;
   }
-  public resources(data: Resource[]): this {
+  public resources(data: Resource[], handler?: ResourceHandler): this {
     for (const resource of data) {
-      this.resource(resource);
+      this.resource(resource, handler);
     }
     return this;
   }
