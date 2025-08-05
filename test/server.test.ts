@@ -42,7 +42,9 @@ describe("H3MCP", () => {
         jsonrpc: "2.0",
         result: {
           protocolVersion: "2025-06-18",
-          capabilities: {},
+          capabilities: {
+            tools: {},
+          },
           serverInfo: {
             name: "Test MCP Server",
             version: "1.0.0",

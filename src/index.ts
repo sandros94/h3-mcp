@@ -36,7 +36,7 @@ export class H3MCP extends H3 {
     this.setupRoutes();
   }
 
-  public resource(definition: Resource, handler: ResourceHandler): this {
+  public resource(definition: Resource, handler?: ResourceHandler): this {
     if (this.resourcesMap.has(definition.uri)) {
       console.warn(
         `[h3-mcp] Warning: Resource "${definition.uri}" is being redefined.`,
@@ -46,6 +46,12 @@ export class H3MCP extends H3 {
       ...definition,
       handler,
     });
+    return this;
+  }
+  public resources(data: Resource[]): this {
+    for (const resource of data) {
+      this.resource(resource);
+    }
     return this;
   }
 

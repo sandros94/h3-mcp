@@ -8,6 +8,7 @@ describe("H3MCP", () => {
     version: "1.0.0",
     description: "A test server for H3 MCP tools",
   });
+
   app.resource(
     {
       uri: "World",
@@ -20,6 +21,26 @@ describe("H3MCP", () => {
       return { text: `Hello, ${uri}!` };
     },
   );
+
+  const remotelyFetchedResources = [
+    {
+      uri: "Foo",
+      name: "Foo Resource",
+      title: "A resource that returns Foo",
+      description: "Returns a Foo message",
+      mimeType: "test/plain",
+      text: "This is a Foo resource",
+    },
+    {
+      uri: "Bar",
+      name: "Bar Resource",
+      title: "A resource that returns Bar",
+      description: "Returns a Bar message",
+      mimeType: "test/plain",
+      text: "This is a Bar resource",
+    },
+  ];
+  app.resources(remotelyFetchedResources);
 
   describe("Resources", () => {
     it("should list available resources", async () => {
@@ -44,6 +65,20 @@ describe("H3MCP", () => {
               title: "A simple resource that returns a greeting",
               description: "Returns a greeting message",
               mimeType: "application/json",
+            },
+            {
+              uri: "Foo",
+              name: "Foo Resource",
+              title: "A resource that returns Foo",
+              description: "Returns a Foo message",
+              mimeType: "test/plain",
+            },
+            {
+              uri: "Bar",
+              name: "Bar Resource",
+              title: "A resource that returns Bar",
+              description: "Returns a Bar message",
+              mimeType: "test/plain",
             },
           ],
         },

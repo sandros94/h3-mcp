@@ -80,11 +80,32 @@ app.resource(
     name: "Hello Resource",
     title: "A simple resource that returns a greeting",
     description: "Returns a greeting message",
-    mimeType: "application/json",
+    mimeType: "test/plain",
   },
   async ({ uri }) => {
     return { text: `Hello, ${uri}!` };
   },
 );
+
+const remotelyFetchedResources = [
+  {
+    uri: "Foo",
+    name: "Foo Resource",
+    title: "A resource that returns Foo",
+    description: "Returns a Foo message",
+    mimeType: "test/plain",
+    text: "This is a Foo resource",
+  },
+  {
+    uri: "Bar",
+    name: "Bar Resource",
+    title: "A resource that returns Bar",
+    description: "Returns a Bar message",
+    mimeType: "test/plain",
+    text: "This is a Bar resource",
+  },
+];
+
+app.resources(remotelyFetchedResources);
 
 serve(app);

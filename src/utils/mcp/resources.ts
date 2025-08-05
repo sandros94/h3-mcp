@@ -53,7 +53,7 @@ export type ResourceHandler = (
 // Resource definition and handler
 export type McpResource = ParseType<
   Resource & {
-    handler: ResourceHandler;
+    handler?: ResourceHandler;
   }
 >;
 
@@ -113,16 +113,17 @@ export function mcpResourcesMethods(
       });
     }
     const { handler, ..._resource } = resource;
-    const res = await handler({ uri: params.uri }, event, {
-      jsonrpc,
-      method,
-      id,
-    });
     return {
       contents: [
         {
           ..._resource,
-          ...res,
+          ...(handler
+            ? await handler({ uri: params.uri }, event, {
+                jsonrpc,
+                method,
+                id,
+              })
+            : {}),
         },
       ],
     };
