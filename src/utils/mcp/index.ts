@@ -9,7 +9,7 @@ import type {
   Implementation,
   ServerCapabilities,
   InitializeRequestParams,
-  InitializeResult,
+  InitializeResponse,
   ListingHandler,
   CallingHandler,
 } from "../../types/index.ts";
@@ -26,29 +26,70 @@ import type {
   ResourceTemplateList,
 } from "./resources.ts";
 import { mcpResourcesMethods } from "./resources.ts";
-import type { McpTool, McpToolMethodMap, Tool } from "./tools.ts";
+import type { Tool, ToolList, McpTool, McpToolMethodMap } from "./tools.ts";
 import { mcpToolsMethods } from "./tools.ts";
 
 export * from "./stream.ts";
 export * from "./tools.ts";
 
+/**
+ * Options for defining an MCP handler.
+ */
 export interface DefineMcpHandlerOptions {
+  /**
+   * Information about the server implementation.
+   */
   serverInfo: Implementation;
+  /**
+   * The capabilities of the server.
+   */
   serverCapabilities: ServerCapabilities;
+  /**
+   * An array of middleware to apply to the handler.
+   */
   middleware?: Middleware[];
+  /**
+   * A map or array of tools to be available.
+   */
   tools?: McpTool[] | Map<string, McpTool>;
+  /**
+   * A map or array of resources to be available.
+   */
   resources?: McpResource[] | Map<string, McpResource>;
+  /**
+   * A map or array of resource templates to be available.
+   */
   resourcesTemplates?: McpResourceTemplate[] | Map<string, McpResourceTemplate>;
-  toolsList?: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>;
+  /**
+   * An optional handler for listing tools.
+   */
+  toolsList?: ListingHandler<{ tools: Tool[] }, ToolList>;
+  /**
+   * An optional handler for calling tools.
+   */
   toolsCall?: CallingHandler<{ name: string; arguments?: unknown }>;
+  /**
+   * An optional handler for listing resources.
+   */
   resourcesList?: ListingHandler<{ resources: ResourceDef[] }, ResourceList>;
+  /**
+   * An optional handler for reading resources.
+   */
   resourcesRead?: CallingHandler<{ uri: string }, Resource | Resource[]>;
+  /**
+   * An optional handler for listing resource templates.
+   */
   resourcesTemplatesList?: ListingHandler<
     { templates: ResourceTemplate[] },
     ResourceTemplateList
   >;
 }
 
+/**
+ * Defines an MCP handler for H3.
+ * @param options The options for the MCP handler.
+ * @returns An H3 event handler.
+ */
 export function defineMcpHandler<
   RequestT extends EventHandlerRequest = EventHandlerRequest,
 >(options: DefineMcpHandlerOptions): EventHandler<RequestT> {
@@ -113,7 +154,7 @@ export function defineMcpHandler<
   function initialize(
     data: JsonRpcRequest<InitializeRequestParams>,
     event: H3Event,
-  ): InitializeResult {
+  ): InitializeResponse {
     const { params } = data;
     if (!params || !params.protocolVersion || !params.clientInfo) {
       throw new HTTPError({

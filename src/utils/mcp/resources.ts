@@ -4,58 +4,135 @@ import type { ListingHandler, CallingHandler } from "../../types/index.ts";
 import type { ParseType, MaybePromise } from "../../types/utils.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
+/**
+ * Annotations for a resource.
+ */
 interface ResourceAnnotations {
+  /**
+   * The intended audience for the resource.
+   */
   audience?: ("user" | "assistant")[];
+  /**
+   * The priority of the resource.
+   */
   priority?: number;
+  /**
+   * The last modified date of the resource.
+   */
   lastModified?: Date;
 }
 
+/**
+ * Base interface for a resource.
+ */
 interface ResourceBase {
+  /**
+   * The name of the resource.
+   */
   name?: string;
+  /**
+   * The title of the resource.
+   */
   title?: string;
+  /**
+   * A description of the resource.
+   */
   description?: string;
+  /**
+   * The MIME type of the resource.
+   */
   mimeType?: string;
+  /**
+   * Annotations for the resource.
+   */
   annotations?: ResourceAnnotations;
 }
 
+/**
+ * The data of a resource, which can be either text or a blob.
+ */
 type ResourceData =
   | {
-      blob?: undefined;
+      /**
+       * The text content of the resource.
+       */
       text: string;
+      blob?: undefined;
     }
   | {
+      /**
+       * The blob content of the resource, as a base64-encoded string.
+       */
       blob: string;
       text?: undefined;
     };
 
-// MCP Specification for defining a resource
+/**
+ * MCP Specification for defining a resource.
+ */
 export type ResourceDef = ParseType<
   ResourceBase & {
+    /**
+     * The URI of the resource.
+     */
     uri: string;
   } & Partial<ResourceData>
 >;
 
+/**
+ * A list of resources.
+ */
 export type ResourceList = ParseType<{
+  /**
+   * An array of resource definitions.
+   */
   resources: Omit<ResourceDef, "text" | "blob">[];
+  /**
+   * A cursor for pagination.
+   */
   nextCursor?: string | undefined;
 }>;
 
+/**
+ * A resource with its data.
+ */
 export type Resource = ParseType<
   Omit<ResourceDef, "text" | "blob"> & ResourceData
 >;
 
+/**
+ * A template for creating resources.
+ */
 export type ResourceTemplate = ParseType<
   ResourceBase & {
+    /**
+     * The URI template for the resource.
+     */
     uriTemplate: string;
   }
 >;
 
+/**
+ * A list of resource templates.
+ */
 export type ResourceTemplateList = ParseType<{
+  /**
+   * An array of resource templates.
+   */
   resourceTemplates: ResourceTemplate[];
+  /**
+   * A cursor for pagination.
+   */
   nextCursor?: string | undefined;
 }>;
 
-// Handler function for a resource
+/**
+ * Handler function for a resource.
+ * @param data The data for the resource.
+ * @param event The H3 event.
+ * @param jsonrpc The JSON-RPC request object.
+ * @returns A promise that resolves to the resource data or void.
+ */
 export type ResourceHandler = (
   data: {
     uri: string;
@@ -68,25 +145,57 @@ export type ResourceHandler = (
   | (Partial<Resource> &
       ({ text: string } | { blob: string }) &
       Record<string, unknown>)
+  | ReadableStream
   | void
 >;
 
-// ResourceDef definition and handler
+/**
+ * A resource definition with its handler.
+ */
 export type McpResource = ParseType<
   ResourceDef & {
+    /**
+     * The handler for the resource.
+     */
     handler?: ResourceHandler;
   }
 >;
 
+/**
+ * A resource template.
+ */
 export type McpResourceTemplate = ResourceTemplate;
 
+/**
+* A map of JSON-RPC methods for MCP resources.
+*/
 export type McpResourceMethodMap = JsonRpcMethodMap;
 
+/**
+ * Creates a set of JSON-RPC methods for handling MCP resource interactions.
+ * @param methods An object containing the resource maps and handlers.
+ * @returns A map of JSON-RPC methods for resources.
+ */
 export function mcpResourcesMethods(methods: {
+  /**
+   * A map of registered resources.
+   */
   resources: Map<string, McpResource>;
+  /**
+   * An optional map of registered resource templates.
+   */
   resourcesTemplates?: Map<string, McpResourceTemplate>;
+  /**
+   * An optional handler for listing resources.
+   */
   resourcesList?: ListingHandler<{ resources: ResourceDef[] }, ResourceList>;
+  /**
+   * An optional handler for reading resources.
+   */
   resourcesRead?: CallingHandler<{ uri: string }, Resource | Resource[]>;
+  /**
+   * An optional handler for listing resource templates.
+   */
   resourcesTemplatesList?: ListingHandler<
     { templates: ResourceTemplate[] },
     ResourceTemplateList

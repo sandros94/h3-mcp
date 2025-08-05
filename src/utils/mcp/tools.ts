@@ -1,11 +1,14 @@
 import { type H3Event, HTTPError } from "h3";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { toJsonSchema } from "@standard-community/standard-json";
-import type { MaybePromise } from "../../types/utils.ts";
+import type { ParseType, MaybePromise } from "../../types/utils.ts";
 import type { ListingHandler, CallingHandler } from "../../types/index.ts";
 import type { JsonRpcMethodMap, JsonRpcRequest } from "../json-rpc.ts";
 
-// MCP Specification for a single tool
+/**
+ * MCP Specification for a single tool.
+ * @template S The schema type for the tool's input.
+ */
 export interface Tool<S extends StandardSchemaV1 = StandardSchemaV1> {
   /**
    * Unique identifier for the tool.
@@ -15,12 +18,44 @@ export interface Tool<S extends StandardSchemaV1 = StandardSchemaV1> {
    * Human-readable name of the tool.
    */
   title?: string;
+  /**
+   * A description of the tool.
+   */
   description?: string;
-  schema?: S; // Standard Schema
-  jsonSchema?: Record<string, unknown>; // raw JSON Schema
+  /**
+   * The Standard Schema for the tool's input.
+   */
+  schema?: S;
+  /**
+   * The raw JSON Schema for the tool's input (MCP Client will use it).
+   */
+  jsonSchema?: Record<string, unknown>;
 }
 
-// Handler function for a tool
+/**
+ * A list of tools.
+ */
+export type ToolList = ParseType<{
+  /**
+   * An array of resource definitions.
+   */
+  tools: ParseType<Omit<Tool, "schema" | "jsonSchema"> & {
+    inputSchema?: Record<string, unknown>;
+  }>[];
+  /**
+   * A cursor for pagination.
+   */
+  nextCursor?: string | undefined;
+}>;
+
+/**
+ * Handler function for a tool.
+ * @template S The schema type for the tool's input.
+ * @param data The parsed input data for the tool.
+ * @param event The H3 event.
+ * @param jsonrpc The JSON-RPC request object.
+ * @returns A promise that resolves to the tool's output.
+ */
 export type ToolHandler<S extends StandardSchemaV1> = (
   data: StandardSchemaV1.InferOutput<S>,
   event: H3Event,
@@ -31,9 +66,16 @@ export type ToolHandler<S extends StandardSchemaV1> = (
 
 /**
  * Tool definition and its corresponding handler.
+ * @template S The schema type for the tool's input.
  */
 export interface McpTool<S extends StandardSchemaV1 = StandardSchemaV1> {
+  /**
+   * The tool's definition.
+   */
   definition: Tool<S>;
+  /**
+   * The tool's handler function.
+   */
   handler: ToolHandler<S>;
 }
 
@@ -46,13 +88,21 @@ export type McpToolMethodMap = JsonRpcMethodMap;
  * Creates a set of JSON-RPC methods for handling MCP tool interactions.
  * This includes listing available tools and calling a specific tool.
  *
- * @param tools A Map of tool definitions and their handlers.
- * @returns A JsonRpcMethodMap to be used with `jsonRpcHandler`.
+ * @param methods An object containing the tool map and handlers.
+ * @returns A `JsonRpcMethodMap` to be used with `defineJsonRpcHandler`.
  */
-
 export function mcpToolsMethods(methods: {
+  /**
+   * A map of tool definitions and their handlers.
+   */
   tools: Map<string, McpTool>;
-  toolsList?: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>;
+  /**
+   * An optional handler for listing tools.
+   */
+  toolsList?: ListingHandler<{ tools: Tool[] }, ToolList>;
+  /**
+   * An optional handler for calling tools.
+   */
   toolsCall?: CallingHandler<{ name: string; arguments?: unknown }>;
 }): McpToolMethodMap {
   /**
