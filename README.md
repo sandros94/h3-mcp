@@ -12,19 +12,22 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 
 ## Features
 
-- Built with H3 v2 (beta) for high performance and runtime agnosticity (in can be mounted as a [nested-app](https://h3.dev/guide/basics/nested-apps)).
+- Built with [H3 v2 (beta)](https://h3.dev) for high performance and runtime agnosticity (it can be mounted as a [nested-app](https://h3.dev/guide/basics/nested-apps)).
 - It is based on the JSON-RPC protocol to accept commands and return results.
-- Tools
-  - Built-in validation, generating JSON Schema automatically with supported validation libraries.
-  - Simple Tool registration and invocation, allowing you to define tools with input validation.
-  - Tool listing method to retrieve all registered tools.
-- Resources
-  - Support for static resources definition, allowing you to serve them statically. (also supports batch definition)
-  - Support for dynamic resources, allowing you to define custom handlers for specific URIs.
-  - Support for resource templates, allowing you to define dynamic URIs. (Completion API is still under development)
+- **Tools**:
+  - Simple Tool registration and invocation with built-in input validation via [Standard-Schema](https://github.com/standard-schema/standard-schema).
+  - Automatic JSON Schema generation for supported validation libraries.
+  - Tool listing method to retrieve all statically registered tools.
+  - Custom handlers for listing and calling dynamic tools.
+- **Resources**:
+  - Support for static resources definition (including batch definition).
+  - Support for resource templates.
+  - Custom handlers for listing and reading dynamic resources (like fetched from a remote storage).
+- **Streaming**:
+  - Streaming responses via `ReadableStream` with a simple utility function.
 
 > [!WARNING]  
-> Project currently under heavy development. The main scope of this project is to provide a simple MCP server with minimal dependencies, alogside showcasing H3 v2 (beta). If you are looking for more capabilities out of the box I suggest you to look for the official [MCP TS SDK](https://github.com/modelcontextprotocol/typescript-sdk) or the great [TMCP](https://github.com/paoloricciuti/tmcp). Or, at least, once once you consider this project more mature.
+> Project currently under heavy development. The main scope of this project is to provide a simple MCP server with minimal dependencies, alongside showcasing H3 v2 (beta). If you are looking for more capabilities out of the box I suggest you to look for the official [MCP TS SDK](https://github.com/modelcontextprotocol/typescript-sdk) or the great [TMCP](https://github.com/paoloricciuti/tmcp).
 
 ### TODO
 
@@ -41,9 +44,11 @@ Install the package:
 npx nypm install h3-mcp-tools
 ```
 
-Minimal example:
+### `H3MCP` App
 
-```js
+The easiest way to get started is to use the `H3MCP` class, which extends H3.
+
+```ts
 import { H3MCP } from "h3-mcp-tools"; // or from CDN via "https://esm.sh/h3-mcp-tools"
 import { serve } from "h3";
 import * as v from "valibot";
@@ -56,8 +61,8 @@ const app = new H3MCP({
 
 app.tool(
   {
-    name: "test",
-    description: "An example tool that echoes back the input",
+    name: "echo",
+    description: "Echoes back the input",
     schema: v.object({
       input: v.string(),
     }),
@@ -70,9 +75,13 @@ app.tool(
 serve(app);
 ```
 
-### Requesting a Tool call
+### Tools
 
-Do a `POST` request to `/mcp` endpoint with the following body:
+You can define tools using the `tool` method on the `H3MCP` instance.
+
+#### Requesting a Tool Call
+
+Do a `POST` request to the `/mcp` endpoint with the following body:
 
 ```json
 {
@@ -80,7 +89,7 @@ Do a `POST` request to `/mcp` endpoint with the following body:
   "id": 1,
   "method": "tools/call",
   "params": {
-    "name": "test",
+    "name": "echo",
     "arguments": {
       "input": "hello from h3"
     }
@@ -100,7 +109,7 @@ You should receive a response like this:
 }
 ```
 
-### Requesting Tool listing
+#### Requesting Tool Listing
 
 To list all registered tools, you can make a `POST` request to the `/mcp` endpoint with the following body:
 
@@ -118,22 +127,22 @@ You should receive a response like this:
 {
   "jsonrpc": "2.0",
   "id": 2,
-  "result": [
-    {
-      "name": "test",
-      "description": "An example tool that echoes back the input",
-      "schema": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-          "input": {
-            "type": "string"
-          }
-        },
-        "required": ["input"]
+  "result": {
+    "tools": [
+      {
+        "name": "echo",
+        "description": "Echoes back the input",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "input": { "type": "string" }
+          },
+          "required": ["input"]
+        }
       }
-    }
-  ]
+    ]
+  }
 }
 ```
 
@@ -148,9 +157,6 @@ app.tool(
   {
     name: "test",
     description: "An example tool that echoes back the input",
-    schema: v.object({
-      input: v.string(),
-    }),
     jsonSchema: {
       $schema: "http://json-schema.org/draft-07/schema#",
       type: "object",
@@ -235,6 +241,10 @@ You can define static resources using the `resource` method, which accepts a `Re
 import { H3MCP } from "h3-mcp-tools";
 import { serve } from "h3";
 
+const app = new H3MCP({
+  description: "A sample MCP server built with H3",
+});
+
 app.resource(
   {
     uri: "hello/world",
@@ -245,7 +255,7 @@ app.resource(
   },
   async ({ uri }) => {
     // uri = "hello/world"
-    return { text: "Hello, world!" };
+    return { text: `Hello, ${uri}!` };
   },
 );
 
@@ -259,39 +269,82 @@ You can also define multiple resources at once using the `resource` method, whic
 ```ts
 const remotelyFetchedResources = [
   {
-    uri: "foo", // URI must be defined and unique
+    uri: "foo",
     name: "Foo Resource",
-    title: "A resource that returns Foo",
-    description: "Returns a Foo message",
-    mimeType: "test/plain",
     text: "This is a Foo resource",
   },
   {
-    uri: "bar", // URI must be defined and unique
+    uri: "bar",
     name: "Bar Resource",
-    title: "A resource that returns Bar",
-    description: "Returns a Bar message",
-    mimeType: "test/plain",
     text: "This is a Bar resource",
-  },
-  {
-    uri: "baz", // URI must be defined and unique
-    name: "Baz Resource",
-    title: "A resource that returns a base64 Baz",
-    description: "Returns a Baz message in base64",
-    mimeType: "application/octet-stream",
-    blob: Buffer.from(
-      await new Blob(["This is a Baz resource"], {
-        type: "application/octet-stream",
-      }).arrayBuffer(),
-    ).toString("base64"),
   },
 ];
 
 app.resource(remotelyFetchedResources, ({ uri }) => {
-  // uri = "foo", "bar" or "baz"
   return { text: `This is a ${uri} resource` };
 });
+```
+
+### Custom Handlers
+
+You can override the default behavior for listing and calling tools, or listing and reading resources, by providing your own handlers. This becomes useful when you want to dynamically manage tools or resources to other sources, like a database or a remote API.
+
+```ts
+// Override tools/list
+app.toolsList(({ tools }) => {
+  return {
+    tools: [
+      ...tools, // Include statically defined tools
+      {
+        name: "custom-listed-tool",
+        description: "A tool added via a custom handler",
+      },
+    ],
+  };
+});
+
+// Override tools/call for non-statically defined tools
+app.toolsCall(async (params) => {
+  if (params.name === "custom-handled-tool") {
+    return { result: "Handled by custom toolsCall" };
+  }
+  // Fallback to default behavior by returning nothing (undefined)
+});
+```
+
+### Standalone Handler
+
+For more advanced use cases, you can use `defineMcpHandler` to create a standalone handler that can be used as a sub-app.
+
+```ts
+import { defineMcpHandler } from "h3-mcp-tools";
+import { serve, H3 } from "h3";
+import * as v from "valibot";
+
+const mcpHandler = defineMcpHandler({
+  serverInfo: {
+    name: "My MCP Server",
+    version: "1.0.0",
+  },
+  tools: [
+    {
+      definition: {
+        name: "echo",
+        description: "Echoes back the input",
+        schema: v.object({
+          input: v.string(),
+        }),
+      },
+      handler: async ({ input }) => {
+        return { output: `You said: ${input}` };
+      },
+    },
+  ],
+});
+
+const app = new H3().all("/mcp", mcpHandler);
+
+serve(app);
 ```
 
 ## Notes
