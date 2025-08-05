@@ -104,6 +104,18 @@ const remotelyFetchedResources = [
     mimeType: "test/plain",
     text: "This is a Bar resource",
   },
+  {
+    uri: "baz",
+    name: "Baz Resource",
+    title: "A resource that returns a base64 Baz",
+    description: "Returns a Baz message in base64",
+    mimeType: "application/octet-stream",
+    blob: Buffer.from(
+      await new Blob(["This is a Baz resource"], {
+        type: "application/octet-stream",
+      }).arrayBuffer(),
+    ).toString("base64"),
+  },
 ];
 
 app.resources(remotelyFetchedResources);

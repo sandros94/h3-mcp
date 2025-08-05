@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import { H3MCP } from "../src/index.ts";
 
-describe("H3MCP", () => {
+describe("H3MCP", async () => {
   const app = new H3MCP({
     name: "Test MCP Server",
     version: "1.0.0",
@@ -38,6 +38,18 @@ describe("H3MCP", () => {
       description: "Returns a Bar message",
       mimeType: "test/plain",
       text: "This is a Bar resource",
+    },
+    {
+      uri: "baz",
+      name: "Baz Resource",
+      title: "A resource that returns a base64 Baz",
+      description: "Returns a Baz message in base64",
+      mimeType: "application/octet-stream",
+      blob: Buffer.from(
+        await new Blob(["This is a Baz resource"], {
+          type: "application/octet-stream",
+        }).arrayBuffer(),
+      ).toString("base64"),
     },
   ];
   app.resources(remotelyFetchedResources);
@@ -80,6 +92,13 @@ describe("H3MCP", () => {
               description: "Returns a Bar message",
               mimeType: "test/plain",
             },
+            {
+              uri: "baz",
+              name: "Baz Resource",
+              title: "A resource that returns a base64 Baz",
+              description: "Returns a Baz message in base64",
+              mimeType: "application/octet-stream",
+            },
           ],
         },
         id: 1,
@@ -111,6 +130,38 @@ describe("H3MCP", () => {
               description: "Returns a greeting message",
               mimeType: "application/json",
               text: "Hello, World!",
+            },
+          ],
+        },
+        id: 1,
+      });
+    });
+
+    it("should return a blob resource by URI", async () => {
+      const result = await app.request("/mcp", {
+        method: "POST",
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "resources/read",
+          params: {
+            uri: "baz",
+          },
+          id: 1,
+        }),
+      });
+
+      const json = await result.json();
+      expect(json).toEqual({
+        jsonrpc: "2.0",
+        result: {
+          contents: [
+            {
+              uri: "baz",
+              name: "Baz Resource",
+              title: "A resource that returns a base64 Baz",
+              description: "Returns a Baz message in base64",
+              mimeType: "application/octet-stream",
+              blob: "VGhpcyBpcyBhIEJheiByZXNvdXJjZQ==",
             },
           ],
         },
