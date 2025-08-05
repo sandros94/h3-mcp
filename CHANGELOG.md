@@ -1,5 +1,35 @@
 # Changelog
 
+## v0.3.0
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.3...v0.3.0)
+
+### 🚀 Enhancements
+
+- Tools and resource listing methods ([c0b5a24](https://github.com/sandros94/h3-mcp-tools/commit/c0b5a24))
+
+### 💅 Refactors
+
+- Only use Maps for internal utilities ([01d8efc](https://github.com/sandros94/h3-mcp-tools/commit/01d8efc))
+- ⚠️  Improve API standardization and add `toolsCall`, `resourcesRead` and `resourcesTemplatesList` methods ([d834ec9](https://github.com/sandros94/h3-mcp-tools/commit/d834ec9))
+- Enhance MCP types and handlers with documentation and improved structure ([4c932c1](https://github.com/sandros94/h3-mcp-tools/commit/4c932c1))
+
+### 📖 Documentation
+
+- Update README ([03ea5c8](https://github.com/sandros94/h3-mcp-tools/commit/03ea5c8))
+
+### 🏡 Chore
+
+- Fix package.json exports and main/module fields ([77dbe0b](https://github.com/sandros94/h3-mcp-tools/commit/77dbe0b))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Improve API standardization and add `toolsCall`, `resourcesRead` and `resourcesTemplatesList` methods ([d834ec9](https://github.com/sandros94/h3-mcp-tools/commit/d834ec9))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.2.3
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.2...v0.2.3)
