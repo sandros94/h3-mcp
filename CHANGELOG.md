@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.2
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.3.1...v0.3.2)
+
+### 🩹 Fixes
+
+- Improve error handling ([2842a78](https://github.com/sandros94/h3-mcp-tools/commit/2842a78))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.3.1
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.3.0...v0.3.1)
