@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.2.2
+
+[compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.1...v0.2.2)
+
+### 🚀 Enhancements
+
+- Resources and automatic server capabilities ([12c5b3e](https://github.com/sandros94/h3-mcp-tools/commit/12c5b3e))
+- `resources` method to batch create resources (useful for docs) ([105f413](https://github.com/sandros94/h3-mcp-tools/commit/105f413))
+
+### 📖 Documentation
+
+- Resources ([f3f4965](https://github.com/sandros94/h3-mcp-tools/commit/f3f4965))
+
+### 🏡 Chore
+
+- Setup CI ([927ffec](https://github.com/sandros94/h3-mcp-tools/commit/927ffec))
+- Apply automated updates ([0856e3e](https://github.com/sandros94/h3-mcp-tools/commit/0856e3e))
+
+### ✅ Tests
+
+- Blob resource trasformed to buffer and base64'd ([890e4fc](https://github.com/sandros94/h3-mcp-tools/commit/890e4fc))
+
+### ❤️ Contributors
+
+- Sandro Circi ([@sandros94](https://github.com/sandros94))
+
 ## v0.2.1
 
 [compare changes](https://github.com/sandros94/h3-mcp-tools/compare/v0.2.0...v0.2.1)

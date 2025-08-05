@@ -1,6 +1,6 @@
 {
   "name": "h3-mcp-tools",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Minimal MCP server built with H3 v2 (beta) as a dedicated app or nested-app.",
   "repository": "sandros94/h3-mcp-tools",
   "license": "MIT",
