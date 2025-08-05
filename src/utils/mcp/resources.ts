@@ -48,7 +48,7 @@ export type ResourceHandler = (
   jsonrpc: Omit<JsonRpcRequest, "id"> & {
     id: string | number | null;
   },
-) => MaybePromise<Partial<Resource & Record<string, unknown>>>;
+) => MaybePromise<Partial<Resource & Record<string, unknown>> | void>;
 
 // Resource definition and handler
 export type McpResource = ParseType<
