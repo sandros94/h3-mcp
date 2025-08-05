@@ -51,23 +51,16 @@ export type McpToolMethodMap = JsonRpcMethodMap;
  */
 
 export function mcpToolsMethods(methods: {
-  toolsCall: McpTool[] | Map<string, McpTool>;
+  toolsCall: Map<string, McpTool>;
   toolsList?: ListingHandler<{ tools: Tool[] }, { tools: Tool[] }>;
 }): McpToolMethodMap {
-  const toolsMap =
-    methods.toolsCall instanceof Map
-      ? methods.toolsCall
-      : new Map<string, McpTool>(
-          methods.toolsCall.map((tool) => [tool.definition.name, tool]),
-        );
-
   /**
    * RPC method: 'tools/list'
    * Lists available tools and their schemas, optionally using a custom handler.
    */
   async function toolsListMethod(data: JsonRpcRequest, event: H3Event) {
     const toolDefs = await Promise.all(
-      [...toolsMap.values()].map(async ({ definition }) => ({
+      [...methods.toolsCall.values()].map(async ({ definition }) => ({
         name: definition.name,
         description: definition.description,
         inputSchema:
@@ -126,7 +119,7 @@ export function mcpToolsMethods(methods: {
     }
 
     const toolName = params.name;
-    const tool = toolsMap.get(toolName);
+    const tool = methods.toolsCall.get(toolName);
 
     if (!tool) {
       throw new HTTPError({

@@ -50,12 +50,28 @@ export function defineMcpHandler<
     serverInfo,
     serverCapabilities,
     middleware,
-    toolsCall = new Map<string, McpTool>(),
     toolsList,
-    resourcesRead = new Map<string, McpResource>(),
     resourcesList,
-    resourcesTemplatesList = new Map<string, McpResourceTemplate>(),
   } = options;
+
+  // --- START: Maps ---
+  const toolsCall =
+    !options.toolsCall || options.toolsCall instanceof Map
+      ? (options.toolsCall ?? new Map())
+      : new Map(options.toolsCall.map((t) => [t.definition.name, t]));
+
+  const resourcesRead =
+    !options.resourcesRead || options.resourcesRead instanceof Map
+      ? (options.resourcesRead ?? new Map())
+      : new Map(options.resourcesRead.map((r) => [r.uri, r]));
+
+  const resourcesTemplatesList =
+    !options.resourcesTemplatesList ||
+    options.resourcesTemplatesList instanceof Map
+      ? (options.resourcesTemplatesList ?? new Map())
+      : new Map(options.resourcesTemplatesList.map((t) => [t.name, t]));
+  // --- END: Maps ---
+
   (middleware || []).push((event) => {
     if (!isMethod(event, ["POST", "GET", "DELETE"])) {
       throw new HTTPError({
@@ -122,18 +138,8 @@ export function defineMcpHandler<
       protocolVersion: negotiatedVersion,
       capabilities: {
         ...serverCapabilities,
-        tools: (
-          toolsCall instanceof Map ? toolsCall.size > 0 : toolsCall.length > 0
-        )
-          ? {}
-          : undefined,
-        resources: (
-          resourcesRead instanceof Map
-            ? resourcesRead.size > 0
-            : resourcesRead.length > 0
-        )
-          ? {}
-          : undefined,
+        tools: toolsCall.size > 0 ? {} : undefined,
+        resources: resourcesRead.size > 0 ? {} : undefined,
       },
     };
   }

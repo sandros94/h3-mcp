@@ -63,30 +63,17 @@ export type McpResourceTemplate = ResourceTemplate;
 export type McpResourceMethodMap = JsonRpcMethodMap;
 
 export function mcpResourcesMethods(methods: {
-  resourcesRead: McpResource[] | Map<string, McpResource>;
+  resourcesRead: Map<string, McpResource>;
   resourcesList?: ListingHandler<
     { resources: Resource[] },
     { resources: Resource[] }
   >;
-  resourcesTemplatesList?:
-    | McpResourceTemplate[]
-    | Map<string, McpResourceTemplate>;
+  resourcesTemplatesList?: Map<string, McpResourceTemplate>;
 }): McpResourceMethodMap {
-  const resourcesMap =
-    methods.resourcesRead instanceof Map
-      ? methods.resourcesRead
-      : new Map(methods.resourcesRead.map((r) => [r.name, r]));
-
-  const templatesMap = methods.resourcesTemplatesList
-    ? methods.resourcesTemplatesList instanceof Map
-      ? methods.resourcesTemplatesList
-      : new Map(methods.resourcesTemplatesList.map((t) => [t.name, t]))
-    : new Map();
-
   // List resources
   async function resourcesList(data: JsonRpcRequest, event: H3Event) {
     const { cursor } = (data.params || {}) as { cursor?: string };
-    const _resources = [...resourcesMap.values()].map((r) => ({
+    const _resources = [...methods.resourcesRead.values()].map((r) => ({
       uri: r.uri,
       name: r.name,
       title: r.title,
@@ -125,7 +112,7 @@ export function mcpResourcesMethods(methods: {
         message: 'Missing or invalid "uri" parameter for resources/read.',
       });
     }
-    const resource = resourcesMap.get(params.uri);
+    const resource = methods.resourcesRead.get(params.uri);
     if (!resource) {
       throw new HTTPError({
         status: 404,
@@ -151,12 +138,13 @@ export function mcpResourcesMethods(methods: {
 
   // List resource templates
   async function resourcesTemplatesList() {
+    if (!methods.resourcesTemplatesList) {
+      return {
+        templates: [],
+      };
+    }
     return {
-      templates: [...templatesMap.values()].map((t) => ({
-        name: t.name,
-        description: t.description,
-        schema: t.schema,
-      })),
+      templates: [...methods.resourcesTemplatesList.values()],
     };
   }
 
