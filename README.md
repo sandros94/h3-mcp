@@ -14,17 +14,22 @@ Minimal MCP server built with H3 v2 (beta) as a dedicated app or subapp.
 
 - Built with H3 v2 (beta) for high performance and runtime agnosticity (in can be mounted as a [nested-app](https://h3.dev/guide/basics/nested-apps)).
 - It is based on the JSON-RPC protocol to accept commands and return results.
-- Built-in validation for tool calls, with JSON Schema for supported validation libraries.
-- Simple Tool registration and invocation, allowing you to define tools with input validation.
-- Tool listing method to retrieve all registered tools.
+- Tools
+  - Built-in validation, generating JSON Schema automatically with supported validation libraries.
+  - Simple Tool registration and invocation, allowing you to define tools with input validation.
+  - Tool listing method to retrieve all registered tools.
+- Resources
+  - Support for static resources definition, allowing you to serve them statically. (batch definition via dedicated method)
+  - Support for dynamic resources, allowing you to define custom handlers for specific URIs.
+  - Support for resource templates, allowing you to define dynamic URIs. (Completion API is still under development)
 
 > [!WARNING]  
 > Project currently under heavy development. The main scope of this project is to provide a simple MCP server with minimal dependencies, alogside showcasing H3 v2 (beta). If you are looking for more capabilities out of the box I suggest you to look for the official [MCP TS SDK](https://github.com/modelcontextprotocol/typescript-sdk) or the great [TMCP](https://github.com/paoloricciuti/tmcp). Or, at least, once once you consider this project more mature.
 
 ### TODO
 
-- [ ] Support for static resources definition
 - [ ] Support for prompt templates definition
+- [ ] Completion API for resources
 - [ ] Built-in Streamable HTTP notifications hooks
 
 ## Usage
@@ -221,6 +226,70 @@ serve(app);
 ```
 
 If you include `finalResponse` in the `createMcpStream` options, it will be sent at the end of the stream, allowing you to send a complete JSON-RPC response with the `jsonrpc`, `id`, and `result` fields and the stream will be closed automatically.
+
+### Resources
+
+You can define static resources using the `resource` method, which accepts a `Resource` object. You can also define dynamic resources with custom handlers.
+
+```ts
+import { H3MCP } from "h3-mcp-tools";
+import { serve } from "h3";
+
+app.resource(
+  {
+    uri: "hello/world",
+    name: "Welcome Resource",
+    title: "A simple resource that returns a greeting",
+    description: "Returns a greeting message",
+    mimeType: "test/plain",
+  },
+  async ({ uri }) => {
+    // uri = "hello/world"
+    return { text: "Hello, world!" };
+  },
+);
+
+serve(app);
+```
+
+#### Batch Resource Definition
+
+You can also define multiple resources at once using the `resources` method, which accepts an array of `Resource` objects:
+
+```ts
+const remotelyFetchedResources = [
+  {
+    uri: "foo",  // URI must be defined and unique
+    name: "Foo Resource",
+    title: "A resource that returns Foo",
+    description: "Returns a Foo message",
+    mimeType: "test/plain",
+    text: "This is a Foo resource",
+  },
+  {
+    uri: "bar",  // URI must be defined and unique
+    name: "Bar Resource",
+    title: "A resource that returns Bar",
+    description: "Returns a Bar message",
+    mimeType: "test/plain",
+    text: "This is a Bar resource",
+  },
+  {
+    uri: "baz",  // URI must be defined and unique
+    name: "Baz Resource",
+    title: "A resource that returns a base64 Baz",
+    description: "Returns a Baz message in base64",
+    mimeType: "application/octet-stream",
+    blob: Buffer.from(
+      await new Blob(["This is a Baz resource"], {
+        type: "application/octet-stream",
+      }).arrayBuffer(),
+    ).toString("base64"),
+  },
+];
+
+app.resources(remotelyFetchedResources);
+```
 
 ## Notes
 
