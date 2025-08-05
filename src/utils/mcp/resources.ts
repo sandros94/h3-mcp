@@ -11,7 +11,7 @@ interface ResourceAnnotations {
   /**
    * The intended audience for the resource.
    */
-  audience?: ("user" | "assistant")[];
+  audience?: ("user" | "assistant")[] | ReadonlyArray<"user" | "assistant">;
   /**
    * The priority of the resource.
    */
