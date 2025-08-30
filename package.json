@@ -35,7 +35,7 @@
   "dependencies": {
     "@standard-community/standard-json": "^0.2.0",
     "@standard-schema/spec": "^1.0.0",
-    "h3": "npm:h3@^2.0.0-beta.3"
+    "h3": "npm:h3@^2.0.0-beta.4"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
