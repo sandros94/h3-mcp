@@ -54,7 +54,7 @@
   "resolutions": {
     "h3-mcp-tools": "link:."
   },
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=22"
   }
