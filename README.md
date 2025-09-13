@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sandros94-h3-mcp-tools-badge.png)](https://mseep.ai/app/sandros94-h3-mcp-tools)
+
 # h3-mcp-tools
 
 <!-- automd:badges bundlephobia style="flat" color="FFDC3B" -->
